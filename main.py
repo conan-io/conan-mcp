@@ -6,7 +6,7 @@ from pydantic import Field
 mcp = FastMCP("conan-mcp")
 
 
-async def run_command(cmd: list[str], timeout: float = 10.0) -> str:
+async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
     """Execute a command and return the output.
     
     Args:
