@@ -6,7 +6,7 @@ from pydantic import Field
 mcp = FastMCP("conan-mcp")
 
 
-async def run_command(cmd: list[str]) -> str:
+async def run_command(cmd: list[str], timeout: float = 10.0) -> str:
     """Execute a command and return the output.
     
     Args:
@@ -21,9 +21,12 @@ async def run_command(cmd: list[str]) -> str:
     proc = None
     try:
         proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            stdin=asyncio.subprocess.DEVNULL
         )
-        stdout, stderr = await proc.communicate()
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
 
         if proc.returncode == 0:
             return stdout.decode("utf-8", "replace")
@@ -32,6 +35,10 @@ async def run_command(cmd: list[str]) -> str:
             if not error_msg:
                 error_msg = f"Conan command failed with return code {proc.returncode}"
             raise RuntimeError(f"Command error: {error_msg}")
+    except asyncio.TimeoutError:
+        if proc:
+            proc.kill()
+        raise RuntimeError(f"Command timeout after {timeout}s")
     except asyncio.CancelledError:
         if proc:
             proc.kill()
