@@ -50,9 +50,9 @@ async def list_conan_packages(
     name: str = Field(description=
         'Pattern like'
         ' - "fmt" : library exact name'
-        ' - "fmt*" : library name starting with "ssl"'
-        ' - "*fmt*" : library name containing "ssl"'
-        ' - "*fmt" : library name ending with "ssl"'
+        ' - "fmt*" : library name starting with "fmt"'
+        ' - "*fmt*" : library name containing "fmt"'
+        ' - "*fmt" : library name ending with "fmt"'
 
     ),
     version: str = Field(default="*",description=
