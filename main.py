@@ -136,7 +136,7 @@ async def list_conan_packages(
         Optional: version: Version or version range to search for.
         Optional: user: User name. Optional.
         Optional: channel: Channel name.
-        Optional: recipe_revision: Recipe revision number also know as rrev.
+        Optional: recipe_revision: Recipe revision number also known as rrev.
         Optional: package_id: Package ID.
         Optional: package_revision: Package revision number also know as prev.
         Optional: filter_settings: Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.
