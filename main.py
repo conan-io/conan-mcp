@@ -109,7 +109,9 @@ async def list_conan_packages(
     )
 ) -> str:
     """
-    List the available versions for Conan packages across remotes.
+    Search for Conan packages across remotes.
+    Searches for Conan packages matching the given query pattern. Supports wildcards
+    and can search in all remotes or a specific one.
     Supports filter settings and filter options.
     Supports version range syntax.
     Supports user and channel.
@@ -151,8 +153,20 @@ async def list_conan_packages(
     if filter_settings or filter_options and not package_id:
         # No package ID provided, searching for all packages
         package_id = "*"
+    
+    if package_revision:
+        if not recipe_revision:
+            recipe_revision = "*"
+        if not package_id:
+            package_id = "*"
 
-    cmd = ["conan", "list", f"{name}/{version}@{user}/{channel}#{recipe_revision}:{package_id}#{package_revision}", "--format=json"]
+    pattern =  f"{name}/{version if version else '*'}"
+    pattern += f"@{user if user else '*'}/{channel if channel else '*'}" if user or channel else ''
+    pattern += f"#{recipe_revision}" if recipe_revision else ''
+    pattern += f":{package_id}" if package_id else ''
+    pattern += f"#{package_revision}" if package_revision else ''
+
+    cmd = ["conan", "list", pattern, "--format=json"]
     if remote:
         cmd.extend(["--remote", remote])
     if filter_settings:
