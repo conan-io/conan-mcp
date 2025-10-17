@@ -124,7 +124,7 @@ async def list_conan_packages(
     - Search for packages by name
     - Search for packages by version or version range
     - Search for packages and filter them using filter settings or filter options
-    - Search for package spefycing package ID, recipe revision, or package revision
+    - Search for package specifying package ID, recipe revision, or package revision
 
     Examples:
     - list_conan_packages(name="fmt", version="1.0.0") - List all available versions for fmt/1.0.0 package in JSON format
