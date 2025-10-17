@@ -105,7 +105,7 @@ async def list_conan_packages(
         'Use "*:fPIC=True" or other pattern if the intent was to apply to dependencies'
     ),
     remote: str = Field(default="*", description=
-        "Remote name. Omit to search all remotes. Dont use if you are not sure about the remote."
+        "Remote name. Omit to search all remotes. Don't use if you are not sure about the remote."
     )
 ) -> str:
     """
