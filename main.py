@@ -101,9 +101,7 @@ async def list_conan_packages(
         ' - "*:fPIC=True" : fPIC'
         ' - "*:header_only=True" : header only'
         ' - "*:shared=False" : shared'
-        ' - "&:with_boost=True,&:with_os_api=False" : Specify multiple filter options'
-        'Use "&:fPIC=True" to refer to the current package.'
-        'Use "*:fPIC=True" or other pattern if the intent was to apply to dependencies'
+        ' - "*:with_boost=True,*:with_os_api=False" : Specify multiple filter options'
     ),
     remote: str = Field(default="*", description=
         "Remote name. Omit to search all remotes. Don't use if you are not sure about the remote."
