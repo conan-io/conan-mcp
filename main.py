@@ -65,19 +65,20 @@ async def list_conan_packages(
         '  - "[>1 <2.0 || ^3.2]" : compatible with 1.x or 3.2.x'
         '  - "*" : all versions'
     ),
-    user: str = Field(default="*", description=
+    user: str = Field(default=None, description=
         'User name. Use * to search all users.'
     ),
-    channel: str = Field(default="*", description=
+    channel: str = Field(default=None, description=
         'Channel name. Use * to search all channels.'
     ), 
-    recipe_revision: str = Field(default="",description=
-        'Recipe revision number also know as rrev. Use * to search all revisions. Use "latest" to search the latest revision.'
+    recipe_revision: str = Field(default=None,description=
+        'Recipe revision number also know as rrev. Use * to search all revisions.'
+        'Use "latest" to search the latest revision.'
     ),
-    package_id: str = Field(default="", description=
+    package_id: str = Field(default=None, description=
         'Package ID. Use * to search all packages.'
     ),
-    package_revision: str = Field(default="", description=
+    package_revision: str = Field(default=None, description=
         'Package revision number also know as prev. Use * to search all revisions.'
     ),
     filter_settings: str = Field(default=None, description=
