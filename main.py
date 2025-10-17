@@ -80,7 +80,7 @@ async def list_conan_packages(
     package_revision: str = Field(default="", description=
         'Package revision number also know as prev. Use * to search all revisions.'
     ),
-    filter_settings: [str] = Field(default=None, description=
+    filter_settings: str = Field(default=None, description=
         'Filter settings like architecture, operating system, build type, compiler,'
         'compiler version, compiler runtime, compiler runtime version.'
         'Omit to search all filter options.'
@@ -93,14 +93,14 @@ async def list_conan_packages(
         ' - "compiler_runtime=libstdc++11" : compiler runtime'
         ' - "compiler_runtime_version=11" : compiler runtime version'
     ),
-    filter_options: [str] = Field(default=None, description=
+    filter_options: str = Field(default=None, description=
         'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
         'Omit to search all filter options.'
         'To use more than one filter option, use a comma to separate them. e.g. "fPIC=True,header_only=True"'
         ' - "*:fPIC=True" : fPIC'
         ' - "*:header_only=True" : header only'
         ' - "*:shared=False" : shared'
-        ' - "&:with_boost=True", &:with_os_api=False : Specify multiple filter options'
+        ' - "&:with_boost=True,&:with_os_api=False" : Specify multiple filter options'
         'Use "&:fPIC=True" to refer to the current package.'
         'Use "*:fPIC=True" or other pattern if the intent was to apply to dependencies'
     ),
@@ -149,7 +149,7 @@ async def list_conan_packages(
     """
 
     if filter_settings or filter_options and not package_id:
-        print("No package ID provided, searching for all packages")
+        # No package ID provided, searching for all packages
         package_id = "*"
 
     cmd = ["conan", "list", f"{name}/{version}@{user}/{channel}#{recipe_revision}:{package_id}#{package_revision}", "--format=json"]
