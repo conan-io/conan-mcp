@@ -38,6 +38,19 @@ Add to your `mcp.json`:
 - `search_conan_packages(query="zlib", remote="conancenter")` - Search for zlib
   in conancenter remote
 
+**`get_conan_profile`**: Get Conan profile configuration
+- `profile` (optional): If provided, show that specific profile; otherwise, default
+
+**Examples:**
+- `get_conan_profile()`
+- `get_conan_profile(profile="linux-debug")`
+
+**`list_conan_profiles`**: List available Conan profiles
+- No parameters
+
+**Examples:**
+- `list_conan_profiles()`
+
 ## Local Development
 
 ### Clone and run
