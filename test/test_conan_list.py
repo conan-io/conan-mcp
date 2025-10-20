@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from unittest.mock import patch
 
 import pytest
