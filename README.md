@@ -27,17 +27,6 @@ Add to your `mcp.json`:
 
 ### Available Tools
 
-**`search_conan_packages`**: Search for Conan packages
-- `query` (required): Search pattern for package names
-- `remote` (optional): Specific remote to search in. **Conan searches all
-  remotes by default if remote is omitted.**
-
-**Examples:**
-- `search_conan_packages(query="boost")` - Search for boost packages in all
-  remotes
-- `search_conan_packages(query="zlib", remote="conancenter")` - Search for zlib
-  in conancenter remote
-
 **`get_conan_profile`**: Get Conan profile configuration
 - `profile` (optional): If provided, show that specific profile; otherwise, default
 
