@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
@@ -54,7 +55,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
 )
 async def get_conan_profile(
     profile: str = Field(default=None, description="Specific profile name to retrieve. If not provided, uses the default profile.")
-) -> str:
+) -> dict:
     """Get Conan profile configuration.
     
     This tool should be called when the user mentions:
@@ -74,8 +75,8 @@ async def get_conan_profile(
         profile: Optional profile name to retrieve. If not specified, retrieves the default profile.
     
     Returns:
-        JSON string containing both host and build profile configurations.
-        The JSON structure includes:
+        Dictionary containing both host and build profile configurations.
+        The dictionary structure includes:
         - "host": Host profile settings (compiler, arch, build_type, etc.)
         - "build": Build profile settings (compiler, arch, build_type, etc.)
         - Additional configuration like package_settings, options, tool_requires, etc.
@@ -83,22 +84,24 @@ async def get_conan_profile(
     cmd = ["conan", "profile", "show", "--format=json"]
     if profile:
         cmd.extend(["--profile", profile])
-    return await run_command(cmd)
+    raw_output = await run_command(cmd)
+    return json.loads(raw_output)
 
 
 @mcp.tool(
     description="List available Conan profiles."
 )
-async def list_conan_profiles() -> str:
+async def list_conan_profiles() -> list[str]:
     """List Conan profiles available.
 
     Use this tool to see which profiles are available to select or inspect.
 
     Returns:
-        JSON string with a list of profile names.
+        List of profile names.
     """
     cmd = ["conan", "profile", "list", "--format=json"]
-    return await run_command(cmd)
+    raw_output = await run_command(cmd)
+    return json.loads(raw_output)
 
 
 def main():
