@@ -57,13 +57,6 @@ async def list_conan_packages(
     ),
     version: str = Field(default="*",description=
         'Version or version range to search for.'
-        'Supports Conan2 version range syntax, e.g.:'
-        '  - "1.2.3" : exact version'
-        '  - "[>=1.0 <2.0]" : any version >=1.0 and <2.0'
-        '  - "[~1.2]" : compatible with 1.2.x'
-        '  - "[^1.0]" : compatible up to next major version'
-        '  - "[>1 <2.0 || ^3.2]" : compatible with 1.x or 3.2.x'
-        '  - "*" : all versions'
     ),
     user: str = Field(default=None, description=
         'User name. Use * to search all users.'
@@ -84,24 +77,9 @@ async def list_conan_packages(
     filter_settings: str = Field(default=None, description=
         'Filter settings like architecture, operating system, build type, compiler,'
         'compiler version, compiler runtime, compiler runtime version.'
-        'Omit to search all filter options.'
-        'To use more than one filter setting, use a comma to separate them. e.g. "arch=armv8,os=Windows,build_type=Release"'
-        ' - "arch=armv8" : architecture'
-        ' - "os=Windows" : operating system'
-        ' - "build_type=Release" : build type'
-        ' - "compiler=gcc" : compiler'
-        ' - "compiler_version=11" : compiler version'
-        ' - "compiler_runtime=libstdc++11" : compiler runtime'
-        ' - "compiler_runtime_version=11" : compiler runtime version'
     ),
     filter_options: str = Field(default=None, description=
         'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
-        'Omit to search all filter options.'
-        'To use more than one filter option, use a comma to separate them. e.g. "fPIC=True,header_only=True"'
-        ' - "*:fPIC=True" : fPIC'
-        ' - "*:header_only=True" : header only'
-        ' - "*:shared=False" : shared'
-        ' - "*:with_boost=True,*:with_os_api=False" : Specify multiple filter options'
     ),
     remote: str = Field(default="*", description=
         "Remote name. Omit to search all remotes. Don't use if you are not sure about the remote."
@@ -135,13 +113,35 @@ async def list_conan_packages(
     Args:
         name: Library name.
         Optional: version: Version or version range to search for.
+            Supports Conan2 version range syntax, e.g.
+            - "1.2.3" : exact version
+            - "[>=1.0 <2.0]" : any version >=1.0 and <2.0
+            - "[~1.2]" : compatible with 1.2.x
+            - "[^1.0]" : compatible up to next major version
+            - "[>1 <2.0 || ^3.2]" : compatible with 1.x or 3.2.x
+            - "*" : all versions
         Optional: user: User name. Optional.
         Optional: channel: Channel name.
         Optional: recipe_revision: Recipe revision number also known as rrev.
         Optional: package_id: Package ID.
         Optional: package_revision: Package revision number also know as prev.
         Optional: filter_settings: Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.
+            Omit to search all filter options.
+            To use more than one filter setting, use a comma to separate them. e.g. "arch=armv8,os=Windows,build_type=Release"
+            - "arch=armv8" : architecture
+            - "os=Windows" : operating system
+            - "build_type=Release" : build type
+            - "compiler=gcc" : compiler
+            - "compiler_version=11" : compiler version
+            - "compiler_runtime=libstdc++11" : compiler runtime
+            - "compiler_runtime_version=11" : compiler runtime version
         Optional: filter_options: Filter options like fPIC, header_only, shared, with_*, without_*, etc.
+            Omit to search all filter options.
+            To use more than one filter option, use a comma to separate them. e.g. "fPIC=True,header_only=True"
+            - "*:fPIC=True" : fPIC
+            - "*:header_only=True" : header only
+            - "*:shared=False" : shared
+            - "*:with_boost=True,*:with_os_api=False" : Specify multiple filter options
         Optional: remote: Remote name. Omit to search all remotes.
     
     Returns:
