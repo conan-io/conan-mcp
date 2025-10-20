@@ -22,7 +22,7 @@ async def client_session() -> AsyncGenerator[ClientSession]:
 @pytest.mark.anyio
 @patch('main.run_command')
 async def test_list_conan_basic(mock_run_command, client_session: ClientSession):
-    """Only name and version, no user/channel."""
+    """Only name and version"""
     mock_run_command.return_value = '{"result": "success"}'
 
     await client_session.call_tool(
@@ -39,7 +39,7 @@ async def test_list_conan_basic(mock_run_command, client_session: ClientSession)
 @pytest.mark.anyio
 @patch('main.run_command')
 async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSession):
-    """Test basic list functionality - command composition."""
+    """Define name, version, user and channel"""
     mock_run_command.return_value = '{"result": "success"}'
 
     await client_session.call_tool(
