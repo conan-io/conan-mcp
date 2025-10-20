@@ -50,6 +50,58 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
 
 
 @mcp.tool(
+    description="Get Conan profile configuration for the user's platform and build environment"
+)
+async def get_conan_profile(
+    profile: str = Field(default=None, description="Specific profile name to retrieve. If not provided, uses the default profile.")
+) -> str:
+    """Get Conan profile configuration.
+    
+    This tool should be called when the user mentions:
+    - Their platform (Windows, macOS, Linux)
+    - Their compiler (gcc, clang, msvc, etc.)
+    - Their architecture (x86_64, arm64, etc.)
+    - Build configurations
+    - When they want to list packages for their specific platform
+    - When they need context about their Conan environment
+    - When they want to check a specific profile configuration
+    
+    This is typically a prerequisite step before listing packages or making 
+    platform-specific recommendations, as it provides essential context about
+    the user's build environment.
+    
+    Args:
+        profile: Optional profile name to retrieve. If not specified, retrieves the default profile.
+    
+    Returns:
+        JSON string containing both host and build profile configurations.
+        The JSON structure includes:
+        - "host": Host profile settings (compiler, arch, build_type, etc.)
+        - "build": Build profile settings (compiler, arch, build_type, etc.)
+        - Additional configuration like package_settings, options, tool_requires, etc.
+    """
+    cmd = ["conan", "profile", "show", "--format=json"]
+    if profile:
+        cmd.extend(["--profile", profile])
+    return await run_command(cmd)
+
+
+@mcp.tool(
+    description="List available Conan profiles."
+)
+async def list_conan_profiles() -> str:
+    """List Conan profiles available.
+
+    Use this tool to see which profiles are available to select or inspect.
+
+    Returns:
+        JSON string with a list of profile names.
+    """
+    cmd = ["conan", "profile", "list", "--format=json"]
+    return await run_command(cmd)
+
+
+@mcp.tool(
     description="Search for Conan packages and check available versions across remotes."
 )
 async def search_conan_packages(
