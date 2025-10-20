@@ -175,43 +175,6 @@ async def list_conan_packages(
     
     return await run_command(cmd)
 
-# @mcp.tool(
-#     description="Search for Conan packages and check available versions across remotes."
-# )
-# async def search_conan_packages(
-#     query: str = Field(description='Pattern like "fmt/*", "boost", or "*ssl*"'),
-#     remote: str = Field(default=None, description="Remote name. Omit to search all remotes.")
-# ) -> str:
-#     """Search for Conan packages across remotes.
-
-#     Searches for Conan packages matching the given query pattern. Supports wildcards
-#     and can search in all remotes or a specific one.
-
-#     Use this tool when you need to:
-#     - Check available versions of dependencies
-#     - Find the latest version of a package
-#     - Search for packages by name
-#     - Update project dependencies
-
-#     Examples:
-#     - search_conan_packages("boost") - Find all boost versions
-#     - search_conan_packages("fmt") - Find all fmt versions
-#     - search_conan_packages("*boost*") - Find packages containing 'boost'
-
-#     Args:
-#         query: Search pattern for package names (supports wildcards like *boost*)
-#         remote: Optional remote name to search in (searches all remotes if not specified)
-
-#     Returns:
-#         JSON string with search results from Conan
-#     """
-
-#     cmd = ["conan", "search", query, "--format=json"]
-#     if remote:
-#         cmd.extend(["--remote", remote])
-
-#     return await run_command(cmd)
-
 
 def main():
     """Main entry point."""
