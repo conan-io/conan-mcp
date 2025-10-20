@@ -48,23 +48,9 @@ async def run_command(cmd: list[str]) -> str:
         "Use just the parameters you need to search for the package. All parameters are optional. Except for name."
 )
 async def list_conan_packages(
-    name: str = Field(description=
-        'Pattern like'
-        ' - "fmt" : library exact name'
-        ' - "fmt*" : library name starting with "fmt"'
-        ' - "*fmt*" : library name containing "fmt"'
-        ' - "*fmt" : library name ending with "fmt"'
-
-    ),
+    name: str = Field(description="Package name pattern (supports wildcards)"),
     version: str = Field(default="*",description=
         'Version or version range to search for.'
-        'Supports Conan2 version range syntax, e.g.:'   
-        '  - "1.2.3" : exact version'
-        '  - "[>=1.0 <2.0]" : any version >=1.0 and <2.0'
-        '  - "[~1.2]" : compatible with 1.2.x'
-        '  - "[^1.0]" : compatible up to next major version'
-        '  - "[>1 <2.0 || ^3.2]" : compatible with 1.x or 3.2.x'
-        '  - "*" : all versions'
     ),
     user: str = Field(default=None, description=
         'User name. Use * to search all users.'
@@ -85,50 +71,18 @@ async def list_conan_packages(
     filter_settings: str = Field(default=None, description=
         'Filter settings like architecture, operating system, build type, compiler,'
         'compiler version, compiler runtime, compiler runtime version.'
-        'Omit to search all filter options.'
-        'To use more than one filter setting, use a comma to separate them. e.g. "arch=armv8,os=Windows,build_type=Release"'
-        ' - "arch=armv8" : architecture'
-        ' - "os=Windows" : operating system'
-        ' - "build_type=Release" : build type'
-        ' - "compiler=gcc" : compiler'
-        ' - "compiler_version=11" : compiler version'
-        ' - "compiler_runtime=libstdc++11" : compiler runtime'
-        ' - "compiler_runtime_version=11" : compiler runtime version'
     ),
     filter_options: str = Field(default=None, description=
         'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
         'Omit to search all filter options.'
-        'To use more than one filter option, use a comma to separate them. e.g. "fPIC=True,header_only=True"'
-        ' - "*:fPIC=True" : fPIC'
-        ' - "*:header_only=True" : header only'
-        ' - "*:shared=False" : shared'
-        ' - "*:with_boost=True,*:with_os_api=False" : Specify multiple filter options'
     ),
     remote: str = Field(default=None, description=
         "Name of the remote to search in. "
-        "If the user explicitly mentions a specific remote (e.g. 'conancenter'), set this field to that exact remote name. "
-        "Use '*' only if the user explicitly asks to search in all remotes. "
-        "If the user asks to search only in the local cache, leave this field unset (None). "
-        "Do not default to '*' unless the instruction clearly says 'all remotes'."
     ),
-    search_in_cache: bool = Field(default=False, description=
-        "Set to True to search in the local cache apart from the remotes."
-        "Set to False to search only in the remotes."
-        "This parameter must be set once before performing the search; "
-        "do not make multiple requests with different values."
-    )
+    search_in_cache: bool = Field(default=False, description="Include local cache in search")
 ) -> dict:
     """
-    Search for Conan packages across remotes.
-    Searches for Conan packages matching the given query pattern. Supports wildcards
-    and can search in all remotes or a specific one.
-    Supports filter settings and filter options.
-    Supports version range syntax.
-    Supports user and channel.
-    Supports recipe revision and package revision.
-    Supports package ID.
-    Supports output format.
-    Supports remote.
+    Search for Conan packages across remotes with fine-grained filtering.
 
     Use this tool when you need to:
     - Check available versions of dependencies
@@ -139,28 +93,28 @@ async def list_conan_packages(
     - Search for package specifying package ID, recipe revision, or package revision
 
     Examples:
-    - list_conan_packages(name="fmt", version="1.0.0") - List all available versions for fmt/1.0.0 package in JSON format
-    - list_conan_packages(name="fmt", filter_settings="arch=armv8") - List all available versions for fmt package in JSON format with architecture armv8
-    - list_conan_packages(name="fmt", filter_options="fPIC=True") - List all available versions for fmt package in JSON format with fPIC
+    - list_conan_packages(name="fmt", version="1.0.0") - List all available versions for fmt/1.0.0 package.
+    - list_conan_packages(name="fmt", filter_settings="arch=armv8") - List all available versions for fmt package with architecture armv8
+    - list_conan_packages(name="fmt", filter_options="fPIC=True") - List all available versions for fmt package with fPIC
 
     Args:
-        name: Library name.
-        Optional: version: Version or version range to search for.
-            Supports Conan2 version range syntax, e.g.
+        name: Package name pattern (required). Supports wildcards:
+            - "fmt" : exact name
+            - "fmt*" : starts with "fmt"
+            - "*fmt*" : contains "fmt"
+            - "*fmt" : ends with "fmt"
+        version: Version or version range (default: "*"). Supports Conan2 syntax:
             - "1.2.3" : exact version
-            - "[>=1.0 <2.0]" : any version >=1.0 and <2.0
+            - "[>=1.0 <2.0]" : range >=1.0 and <2.0
             - "[~1.2]" : compatible with 1.2.x
-            - "[^1.0]" : compatible up to next major version
-            - "[>1 <2.0 || ^3.2]" : compatible with 1.x or 3.2.x
-            - "*" : all versions
-        Optional: user: User name. Optional.
-        Optional: channel: Channel name.
-        Optional: recipe_revision: Recipe revision number also known as rrev.
-        Optional: package_id: Package ID.
-        Optional: package_revision: Package revision number also know as prev.
-        Optional: filter_settings: Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.
-            Omit to search all filter options.
-            To use more than one filter setting, use a comma to separate them. e.g. "arch=armv8,os=Windows,build_type=Release"
+            - "[^1.0]" : compatible up to next major
+            - "[>1 <2.0 || ^3.2]" : multiple ranges
+        user: User name (default: None). Use "*" for all users.
+        channel: Channel name (default: None). Use "*" for all channels.
+        recipe_revision: Recipe revision (rrev) (default: None). Use "*" for all, "latest" for latest.
+        package_id: Package ID (default: None). Use "*" for all packages.
+        package_revision: Package revision (prev) (default: None). Use "*" for all revisions.
+        filter_settings: Filter by settings (default: None). Comma-separated list:
             - "arch=armv8" : architecture
             - "os=Windows" : operating system
             - "build_type=Release" : build type
@@ -168,18 +122,28 @@ async def list_conan_packages(
             - "compiler_version=11" : compiler version
             - "compiler_runtime=libstdc++11" : compiler runtime
             - "compiler_runtime_version=11" : compiler runtime version
-        Optional: filter_options: Filter options like fPIC, header_only, shared, with_*, without_*, etc.
-            Omit to search all filter options.
-            To use more than one filter option, use a comma to separate them. e.g. "fPIC=True,header_only=True"
-            - "*:fPIC=True" : fPIC
+        filter_options: Filter by options (default: None). Comma-separated list:
+            - "*:fPIC=True" : fPIC option
             - "*:header_only=True" : header only
-            - "*:shared=False" : shared
-            - "*:with_boost=True,*:with_os_api=False" : Specify multiple filter options
-        Optional: remote: Remote name. Omit to search all remotes.
-    
-    Returns:
-        Dictionary string with list of available versions from Conan
+            - "*:shared=False" : shared library
+            - "*:with_boost=True" : with boost option
+        remote: Remote name (default: None). 
+            - None: Search in local cache only
+            - "conancenter": Search in ConanCenter remote
+            - "*": Search in all remotes
+            - Other remote names: Search in specific remote
+        search_in_cache: Include local cache in search (default: False). 
+            - True: Search in both remotes and local cache
+            - False: Search only in remotes (default)
+            Note: This parameter should be set consistently across requests.
 
+    Returns:
+        Dictionary containing available packages and their metadata.
+
+    Examples:
+        - list_conan_packages(name="fmt", version="1.0.0")
+        - list_conan_packages(name="*boost*", filter_settings="arch=armv8,os=Windows")
+        - list_conan_packages(name="zlib", filter_options="shared=True")
     """
 
     if filter_settings or filter_options and not package_id:
