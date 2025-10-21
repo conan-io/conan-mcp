@@ -65,16 +65,14 @@ async def list_conan_packages(
     package_id: str = Field(default=None, description=
         'Package ID. Use * to search all packages.'
     ),
-    package_revision: str = Field(default=None, description=
-        'Package revision number also know as prev. Use * to search all revisions.'
-    ),
-    filter_settings: str = Field(default=None, description=
+    filter_settings: list[str] = Field(default=None, description=
         'Filter settings like architecture, operating system, build type, compiler,'
         'compiler version, compiler runtime, compiler runtime version.'
+        'Pass as list of strings, e.g. ["arch=armv8", "os=Windows", "build_type=Release"]'
     ),
-    filter_options: str = Field(default=None, description=
+    filter_options: list[str] = Field(default=None, description=
         'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
-        'Omit to search all filter options.'
+        'Pass as list of strings, e.g. ["*:fPIC=True", "*:header_only=True"]'
     ),
     remote: str = Field(default=None, description=
         "Name of the remote to search in. "
@@ -90,12 +88,12 @@ async def list_conan_packages(
     - Search for packages by name
     - Search for packages by version or version range
     - Search for packages and filter them using filter settings or filter options
-    - Search for package specifying package ID, recipe revision, or package revision
+    - Search for package specifying package ID, or recipe revision
 
-    Examples:
-    - list_conan_packages(name="fmt", version="1.0.0") - List all available versions for fmt/1.0.0 package.
-    - list_conan_packages(name="fmt", filter_settings="arch=armv8") - List all available versions for fmt package with architecture armv8
-    - list_conan_packages(name="fmt", filter_options="fPIC=True") - List all available versions for fmt package with fPIC
+     Examples:
+     - list_conan_packages(name="fmt", version="1.0.0") - List all available versions for fmt/1.0.0 package.
+     - list_conan_packages(name="fmt", filter_settings=["arch=armv8"]) - List all available versions for fmt package with architecture armv8
+     - list_conan_packages(name="fmt", filter_options=["*:fPIC=True"]) - List all available versions for fmt package with fPIC
 
     Args:
         name: Package name pattern (required). Supports wildcards:
@@ -113,20 +111,19 @@ async def list_conan_packages(
         channel: Channel name (default: None). Use "*" for all channels.
         recipe_revision: Recipe revision (rrev) (default: None). Use "*" for all, "latest" for latest.
         package_id: Package ID (default: None). Use "*" for all packages.
-        package_revision: Package revision (prev) (default: None). Use "*" for all revisions.
-        filter_settings: Filter by settings (default: None). Comma-separated list:
-            - "arch=armv8" : architecture
-            - "os=Windows" : operating system
-            - "build_type=Release" : build type
-            - "compiler=gcc" : compiler
-            - "compiler_version=11" : compiler version
-            - "compiler_runtime=libstdc++11" : compiler runtime
-            - "compiler_runtime_version=11" : compiler runtime version
-        filter_options: Filter by options (default: None). Comma-separated list:
-            - "*:fPIC=True" : fPIC option
-            - "*:header_only=True" : header only
-            - "*:shared=False" : shared library
-            - "*:with_boost=True" : with boost option
+         filter_settings: Filter by settings (default: None). List of strings:
+             - ["arch=armv8"] : architecture
+             - ["os=Windows"] : operating system
+             - ["build_type=Release"] : build type
+             - ["compiler=gcc"] : compiler
+             - ["compiler_version=11"] : compiler version
+             - ["compiler_runtime=libstdc++11"] : compiler runtime
+             - ["compiler_runtime_version=11"] : compiler runtime version
+         filter_options: Filter by options (default: None). List of strings:
+             - ["*:fPIC=True"] : fPIC option
+             - ["*:header_only=True"] : header only
+             - ["*:shared=False"] : shared library
+             - ["*:with_boost=True"] : with boost option
         remote: Remote name (default: None). 
             - None: Search in local cache only
             - "conancenter": Search in ConanCenter remote
@@ -140,35 +137,30 @@ async def list_conan_packages(
     Returns:
         Dictionary containing available packages and their metadata.
 
-    Examples:
-        - list_conan_packages(name="fmt", version="1.0.0")
-        - list_conan_packages(name="*boost*", filter_settings="arch=armv8,os=Windows")
-        - list_conan_packages(name="zlib", filter_options="shared=True")
+     Examples:
+         - list_conan_packages(name="fmt", version="1.0.0")
+         - list_conan_packages(name="*boost*", filter_settings=["arch=armv8", "os=Windows"])
+         - list_conan_packages(name="zlib", filter_options=["*:shared=True"])
     """
 
-    if filter_settings or filter_options and not package_id:
+    if (filter_settings or filter_options) and not package_id:
         # No package ID provided, searching for all packages
         package_id = "*"
-    
-    if package_revision:
-        if not recipe_revision:
-            recipe_revision = "*"
-        if not package_id:
-            package_id = "*"
 
     pattern =  f"{name}/{version if version else '*'}"
     pattern += f"@{user if user else '*'}/{channel if channel else '*'}" if user or channel else ''
     pattern += f"#{recipe_revision}" if recipe_revision else ''
-    pattern += f":{package_id}" if package_id else ''
-    pattern += f"#{package_revision}" if package_revision else ''
+    pattern += f":{package_id}#*" if package_id else ''
 
     cmd = ["conan", "list", pattern, "--format=json"]
     if remote:
         cmd.extend(["--remote", remote])
     if filter_settings:
-        cmd.extend([ i for fs in filter_settings.split(",")  for i in ( '-fs', fs)])
+        for fs in filter_settings:
+            cmd.extend(['-fs', fs])
     if filter_options:
-        cmd.extend([ i for fo in filter_options.split(",")  for i in ( '-fo', fo)])
+        for fo in filter_options:
+            cmd.extend(['-fo', fo])
     if search_in_cache:
         cmd.extend(["--cache"])
     raw_output = await run_command(cmd)
