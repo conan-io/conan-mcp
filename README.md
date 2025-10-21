@@ -2,6 +2,13 @@
 
 A Model Context Protocol server for Conan package manager integration.
 
+## Usage Examples
+
+> *"Create a CMake library project with Conan that has the latest version of fmt
+> and openssl as requirements, install the dependencies and verify that the
+> libraries I depend on don't have serious vulnerabilities and have a license
+> that allows my application to be commercial."*
+
 ## Installation
 
 ### Requirements
@@ -27,18 +34,30 @@ Add to your `mcp.json`:
 
 ### Available Tools
 
-**`get_conan_profile`**: Get Conan profile configuration
+**`get_conan_profile`**: 
+
+Get Conan profile configuration
+
+Parameters:
 - `profile` (optional): If provided, show that specific profile; otherwise, default
 
-**Examples:**
-- `get_conan_profile()`
-- `get_conan_profile(profile="linux-debug")`
+Usage examples:
 
-**`list_conan_profiles`**: List available Conan profiles
+- *"What is my default Conan profile?"*
+- *"Show me the linux-debug profile configuration"*
+- *"Verify that my profile supports C++20"*
+
+**`list_conan_profiles`** 
+
+List available Conan profiles
+
+Parameters:
 - No parameters
 
-**Examples:**
-- `list_conan_profiles()`
+Usage examples:
+
+- *"What Conan profiles do I have available?"*
+- *"List all my configured profiles"*
 
 ## Local Development
 
