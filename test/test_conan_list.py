@@ -28,12 +28,12 @@ async def test_list_conan_basic(mock_run_command, client_session: ClientSession)
 
     await client_session.call_tool(
         "list_conan_packages",
-        {"name": "zlib", "version": "1.2.11"}
+        {"name": "foo", "version": "1.2.11"}
     )
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "list", "zlib/1.2.11", "--format=json", "--remote", "*"]
+    expected_cmd = ["conan", "list", "foo/1.2.11", "--format=json"]
     assert call_args == expected_cmd
 
 
@@ -46,7 +46,7 @@ async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSe
     await client_session.call_tool(
         "list_conan_packages", 
         {
-            "name": "zlib",
+            "name": "foo",
             "version": "1.2.11",
             "user": "*",
             "channel": "*"
@@ -55,7 +55,7 @@ async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSe
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "list", "zlib/1.2.11@*/*", "--format=json", "--remote", "*"]
+    expected_cmd = ["conan", "list", "foo/1.2.11@*/*", "--format=json"]
     assert call_args == expected_cmd
 
 
@@ -67,23 +67,21 @@ async def test_list_conan_rrev_pid_prev(mock_run_command, client_session: Client
 
     rrev = "abc123"
     pid = "qwerty"
-    prev = "foobar"
 
     await client_session.call_tool(
         "list_conan_packages",
         {
-            "name": "zlib",
+            "name": "foo",
             "version": "1.2.11",
             "recipe_revision": rrev,
             "package_id": pid,
-            "package_revision": prev
         }
     )
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
     expected_cmd = [
-        "conan", "list", f"zlib/1.2.11#{rrev}:{pid}#{prev}", "--format=json", "--remote", "*"
+        "conan", "list", f"foo/1.2.11#{rrev}:{pid}#*", "--format=json"
     ]
     assert call_args == expected_cmd
 
@@ -96,13 +94,13 @@ async def test_list_conan_filter_options(mock_run_command, client_session: Clien
 
     await client_session.call_tool(
         "list_conan_packages",
-        {"name": "zlib", "filter_options": "*:fPIC=True,*:shared=False"}
+        {"name": "zlib", "filter_options": ["*:fPIC=True", "*:shared=False"]}
     )
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
     expected_cmd = [
-        "conan", "list", "zlib/*:*", "--format=json", "--remote", "*",
+        "conan", "list", "zlib/*:*#*", "--format=json",
         "-fo", "*:fPIC=True", "-fo", "*:shared=False"
     ]
     assert call_args == expected_cmd
@@ -116,13 +114,13 @@ async def test_list_conan_filter_settings(mock_run_command, client_session: Clie
 
     await client_session.call_tool(
         "list_conan_packages",
-        {"name": "zlib", "filter_settings": "arch=armv8,os=Windows"}
+        {"name": "zlib", "filter_settings": ["arch=armv8", "os=Windows"]}
     )
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
     expected_cmd = [
-        "conan", "list", "zlib/*:*", "--format=json", "--remote", "*",
+        "conan", "list", "zlib/*:*#*", "--format=json",
         "-fs", "arch=armv8", "-fs", "os=Windows"
     ]
     assert call_args == expected_cmd
