@@ -50,44 +50,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
         raise RuntimeError(f"Error running command: {str(e)}")
 
         
-@mcp.tool(
-    description=
-        "List the available versions for conan packages specified by the user using a fine-grained search query."
-        "Use just the parameters you need to search for the package. All parameters are optional. Except for name."
-)
-async def list_conan_packages(
-    name: str = Field(description="Package name pattern (supports wildcards)"),
-    version: str = Field(default="*",description=
-        'Version or version range to search for.'
-    ),
-    user: str = Field(default=None, description=
-        'User name. Use * to search all users.'
-    ),
-    channel: str = Field(default=None, description=
-        'Channel name. Use * to search all channels.'
-    ), 
-    recipe_revision: str = Field(default=None,description=
-        'Recipe revision number also know as rrev. Use * to search all revisions.'
-        'Use "latest" to search the latest revision.'
-    ),
-    package_id: str = Field(default=None, description=
-        'Package ID. Use * to search all packages.'
-    ),
-    filter_settings: list[str] = Field(default=None, description=
-        'Filter settings like architecture, operating system, build type, compiler,'
-        'compiler version, compiler runtime, compiler runtime version.'
-        'Pass as list of strings, e.g. ["arch=armv8", "os=Windows", "build_type=Release"]'
-    ),
-    filter_options: list[str] = Field(default=None, description=
-        'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
-        'Pass as list of strings, e.g. ["*:fPIC=True", "*:header_only=True"]'
-    ),
-    remote: str = Field(default=None, description=
-        "Name of the remote to search in. "
-    ),
-    search_in_cache: bool = Field(default=False, description="Include local cache in search")
-) -> dict:
-    """
+@mcp.tool(description="""
     Search for Conan packages across remotes with fine-grained filtering.
 
     Use this tool when you need to:
@@ -119,19 +82,21 @@ async def list_conan_packages(
         channel: Channel name (default: None). Use "*" for all channels.
         recipe_revision: Recipe revision (rrev) (default: None). Use "*" for all, "latest" for latest.
         package_id: Package ID (default: None). Use "*" for all packages.
-         filter_settings: Filter by settings (default: None). List of strings:
-             - ["arch=armv8"] : architecture
-             - ["os=Windows"] : operating system
-             - ["build_type=Release"] : build type
-             - ["compiler=gcc"] : compiler
-             - ["compiler_version=11"] : compiler version
-             - ["compiler_runtime=libstdc++11"] : compiler runtime
-             - ["compiler_runtime_version=11"] : compiler runtime version
-         filter_options: Filter by options (default: None). List of strings:
-             - ["*:fPIC=True"] : fPIC option
-             - ["*:header_only=True"] : header only
-             - ["*:shared=False"] : shared library
-             - ["*:with_boost=True"] : with boost option
+        filter_settings: Filter by settings (default: None). List of strings:
+            Pass as list of strings, e.g. ["arch=armv8", "os=Windows", "build_type=Release"]
+            - ["arch=armv8"] : architecture
+            - ["os=Windows"] : operating system
+            - ["build_type=Release"] : build type
+            - ["compiler=gcc"] : compiler
+            - ["compiler_version=11"] : compiler version
+            - ["compiler_runtime=libstdc++11"] : compiler runtime
+            - ["compiler_runtime_version=11"] : compiler runtime version
+        filter_options: Filter by options (default: None). List of strings:
+            Pass as list of strings, e.g. ["*:fPIC=True", "*:header_only=True", "*:shared=False", "*:with_boost=True"]
+            - ["*:fPIC=True"] : fPIC option
+            - ["*:header_only=True"] : header only
+            - ["*:shared=False"] : shared library
+            - ["*:with_boost=True"] : with boost option
         remote: Remote name (default: None). 
             - None: Search in local cache only
             - "conancenter": Search in ConanCenter remote
@@ -149,8 +114,35 @@ async def list_conan_packages(
          - list_conan_packages(name="fmt", version="1.0.0")
          - list_conan_packages(name="*boost*", filter_settings=["arch=armv8", "os=Windows"])
          - list_conan_packages(name="zlib", filter_options=["*:shared=True"])
-    """
-
+    """)
+async def list_conan_packages(
+    name: str = Field(description="Package name pattern (supports wildcards)"),
+    version: str = Field(default="*",description=
+        'Version or version range to search for.'
+    ),
+    user: str = Field(default=None, description=
+        'User name. Use * to search all users.'
+    ),
+    channel: str = Field(default=None, description=
+        'Channel name. Use * to search all channels.'
+    ), 
+    recipe_revision: str = Field(default=None,description=
+        'Recipe revision number also know as rrev. Use * to search all revisions. Use "latest" to search the latest revision.'
+    ),
+    package_id: str = Field(default=None, description=
+        'Package ID. Use * to search all packages.'
+    ),
+    filter_settings: list[str] = Field(default=None, description=
+        'Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.'
+    ),
+    filter_options: list[str] = Field(default=None, description=
+        'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
+    ),
+    remote: str = Field(default=None, description=
+        'Name of the remote to search in.'
+    ),
+    search_in_cache: bool = Field(default=False, description="Include local cache in search")
+) -> dict:
     if (filter_settings or filter_options) and not package_id:
         # No package ID provided, searching for all packages
         package_id = "*"
