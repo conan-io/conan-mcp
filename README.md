@@ -45,7 +45,6 @@ Usage examples:
 
 - *"What is my default Conan profile?"*
 - *"Show me the linux-debug profile configuration"*
-- *"Verify that my profile supports C++20"*
 
 **`list_conan_profiles`** 
 
