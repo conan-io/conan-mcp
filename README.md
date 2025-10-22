@@ -79,9 +79,9 @@ Usage examples:
 - *"Show all zlib packages for Windows armv8 in my local cache"*
 - *"List all packages that contain boost in the name in conancenter"*
 - *"Search for fmt versions greater than or equal to 8.0 but less than 9.0 in conancenter"*
-- *"Search for zlib versions compatibles with 1.3.x"*
-- *"List versions of poco provided by user barbarian and channel stable"*
-- *"Provide all packages for zlib 1.3 that use the recipe at revision b3b71bfe8dd07abc7b82ff2bd0eac021"*   
+- *"Search for zlib versions compatibles with 1.3.x in every remote"*
+- *"List versions of poco provided by user barbarian and channel stable in local cache"*
+- *"Provide all packages for zlib 1.3 that use the recipe at revision b3b71bfe8dd07abc7b82ff2bd0eac021 in conancenter"*   
 
 
 
