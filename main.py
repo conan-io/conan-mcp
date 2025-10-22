@@ -168,12 +168,7 @@ async def list_conan_packages(
         
     
 @mcp.tool(
-    description="Get Conan profile configuration for the user's platform and build environment"
-)
-async def get_conan_profile(
-    profile: str = Field(default=None, description="Specific profile name to retrieve. If not provided, uses the default profile.")
-) -> dict:
-    """Get Conan profile configuration.
+    description="""Get Conan profile configuration.
     
     This tool should be called when the user mentions:
     - Their platform (Windows, macOS, Linux)
@@ -198,6 +193,10 @@ async def get_conan_profile(
         - "build": Build profile settings (compiler, arch, build_type, etc.)
         - Additional configuration like package_settings, options, tool_requires, etc.
     """
+)
+async def get_conan_profile(
+    profile: str = Field(default=None, description="Specific profile name to retrieve. If not provided, uses the default profile.")
+) -> dict:
     cmd = ["conan", "profile", "show", "--format=json"]
     if profile:
         cmd.extend(["--profile", profile])
@@ -206,16 +205,15 @@ async def get_conan_profile(
 
 
 @mcp.tool(
-    description="List available Conan profiles."
-)
-async def list_conan_profiles() -> list[str]:
-    """List Conan profiles available.
+    description="""List Conan profiles available.
 
     Use this tool to see which profiles are available to select or inspect.
 
     Returns:
         List of profile names.
     """
+)
+async def list_conan_profiles() -> list[str]:    
     cmd = ["conan", "profile", "list", "--format=json"]
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
