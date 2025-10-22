@@ -57,7 +57,6 @@ Parameters:
 Usage examples:
 
 - *"What Conan profiles do I have available?"*
-- *"List all my Conan profiles"*
 
 ## Local Development
 
