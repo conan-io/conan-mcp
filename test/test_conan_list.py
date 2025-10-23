@@ -33,7 +33,7 @@ async def test_list_conan_basic(mock_run_command, client_session: ClientSession)
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "list", "foo/1.2.11", "--format=json"]
+    expected_cmd = ["conan", "list", "foo/1.2.11", "--format=json", "--remote", "*"]
     assert call_args == expected_cmd
 
 
@@ -55,7 +55,7 @@ async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSe
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "list", "foo/1.2.11@*/*", "--format=json"]
+    expected_cmd = ["conan", "list", "foo/1.2.11@*/*", "--format=json", "--remote", "*"]
     assert call_args == expected_cmd
 
 
@@ -81,7 +81,7 @@ async def test_list_conan_rrev_pid_prev(mock_run_command, client_session: Client
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
     expected_cmd = [
-        "conan", "list", f"foo/1.2.11#{rrev}:{pid}#*", "--format=json"
+        "conan", "list", f"foo/1.2.11#{rrev}:{pid}", "--format=json", "--remote", "*"
     ]
     assert call_args == expected_cmd
 
@@ -94,14 +94,14 @@ async def test_list_conan_filter_options(mock_run_command, client_session: Clien
 
     await client_session.call_tool(
         "list_conan_packages",
-        {"name": "zlib", "filter_options": ["*:fPIC=True", "*:shared=False"]}
+        {"name": "zlib", "filter_options": ["*:fPIC=True", "*:shared=False"], "include_all_package_revision": True}
     )
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
     expected_cmd = [
         "conan", "list", "zlib/*:*#*", "--format=json",
-        "-fo", "*:fPIC=True", "-fo", "*:shared=False"
+        "--remote", "*", "-fo", "*:fPIC=True", "-fo", "*:shared=False"
     ]
     assert call_args == expected_cmd
 
@@ -120,8 +120,8 @@ async def test_list_conan_filter_settings(mock_run_command, client_session: Clie
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
     expected_cmd = [
-        "conan", "list", "zlib/*:*#*", "--format=json",
-        "-fs", "arch=armv8", "-fs", "os=Windows"
+        "conan", "list", "zlib/*:*", "--format=json",
+        "--remote", "*", "-fs", "arch=armv8", "-fs", "os=Windows"
     ]
     assert call_args == expected_cmd
 

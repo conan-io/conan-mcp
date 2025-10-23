@@ -80,8 +80,12 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             - "[>1 <2.0 || ^3.2]" : multiple ranges
         user: User name (default: None). Use "*" for all users.
         channel: Channel name (default: None). Use "*" for all channels.
-        recipe_revision: Recipe revision (rrev) (default: None). Use "*" for all, "latest" for latest.
+        recipe_revision: Recipe revision (rrev) (default: None). 
+            Use "*" for all, "latest" for latest.
+            Use it together with package_id to find all packages with the same recipe revision.
         package_id: Package ID (default: None). Use "*" for all packages.
+            Use "*" when you are trying to find all packages.
+            Use it together with include_all_package_revision to include all package revisions.
         filter_settings: Filter by settings (default: None). List of strings:
             Pass as list of strings, e.g. ["arch=armv8", "os=Windows", "build_type=Release"]
             - ["arch=armv8"] : architecture
@@ -97,7 +101,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             - ["*:header_only=True"] : header only
             - ["*:shared=False"] : shared library
             - ["*:with_boost=True"] : with boost option
-        remote: Remote name (default: None). 
+        remote: Remote name (default: "*"). 
             - None: Search in local cache only
             - "conancenter": Search in ConanCenter remote
             - "*": Search in all remotes
@@ -106,6 +110,9 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             - True: Search in both remotes and local cache
             - False: Search only in remotes (default)
             Note: This parameter should be set consistently across requests.
+        include_all_package_revision: Include all package revisions (default: False). 
+            - True: Include all package revisions.
+            - False: Include only the latest package revision (default)
 
     Returns:
         Dictionary containing available packages and their metadata.
@@ -138,10 +145,11 @@ async def list_conan_packages(
     filter_options: list[str] = Field(default=None, description=
         'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
     ),
-    remote: str = Field(default=None, description=
+    remote: str = Field(default="*", description=
         'Name of the remote to search in.'
     ),
-    search_in_cache: bool = Field(default=False, description="Include local cache in search")
+    search_in_cache: bool = Field(default=False, description="Include local cache in search"),
+    include_all_package_revision: bool = Field(default=False, description="Include all package revisions")
 ) -> dict:
     if (filter_settings or filter_options) and not package_id:
         # No package ID provided, searching for all packages
@@ -150,7 +158,9 @@ async def list_conan_packages(
     pattern =  f"{name}/{version if version else '*'}"
     pattern += f"@{user if user else '*'}/{channel if channel else '*'}" if user or channel else ''
     pattern += f"#{recipe_revision}" if recipe_revision else ''
-    pattern += f":{package_id}#*" if package_id else ''
+    if package_id:
+        pattern += f":{package_id}"
+        pattern += f"#*" if include_all_package_revision else ''
 
     cmd = ["conan", "list", pattern, "--format=json"]
     if remote:
