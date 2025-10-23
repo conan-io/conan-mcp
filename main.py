@@ -274,9 +274,7 @@ async def list_conan_profiles() -> list[str]:
     """
 )
 async def conan_new(
-    template: str = Field(
-        description="Template type for the project"
-    ),
+    template: str = Field(description="Template type for the project"),
     name: str = Field(description="Name of the project"),
     version: str = Field(default="0.1", description="Version of the project"),
     requires: list[str] = Field(
@@ -298,17 +296,17 @@ async def conan_new(
     # Add template arguments
     cmd.extend(["--define", f"name={name}"])
     cmd.extend(["--define", f"version={version}"])
-    
+
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
                 cmd.extend(["--define", f"requires={dep.strip()}"])
-    
+
     # Add output directory
     if output_dir != ".":
         cmd.extend(["--output", output_dir])
-    
+
     # Add force flag if requested
     if force:
         cmd.append("--force")
