@@ -242,6 +242,7 @@ async def list_conan_profiles() -> list[str]:
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
+
 @mcp.tool(
     description="""
     Install Conan package dependencies from a recipe file (conanfile.py or conanfile.txt).
@@ -297,26 +298,29 @@ async def list_conan_profiles() -> list[str]:
     """
 )
 async def install_conan_packages(
-    path: str = Field(description='Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py'),
-    remote: str = Field(default=None, description="Remote name. Omit  to search in all remotes."),
+    path: str = Field(
+        description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
+    ),
+    remote: str = Field(
+        default=None, description="Remote name. Omit  to search in all remotes."
+    ),
     settings_host: list[str] = Field(
         default=None,
         description=(
             "Apply different settings like architecture, operating system, build type, compiler, "
-        )
+        ),
     ),
     options_host: list[str] = Field(
         default=None,
         description=(
             "Apply options like fPIC, header_only, shared, with_*, without_*, etc. to the host context only. "
-        )
+        ),
     ),
     build_missing: bool = Field(
         default=False,
-        description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download."
+        description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download.",
     ),
 ) -> dict:
-
     cmd = ["conan", "install", path]
 
     if remote:
