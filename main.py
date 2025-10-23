@@ -49,7 +49,134 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
     except Exception as e:
         raise RuntimeError(f"Error running command: {str(e)}")
 
+        
+@mcp.tool(description="""
+    Search for Conan packages across remotes with fine-grained filtering.
 
+    Use this tool when you need to:
+    - Check available versions of dependencies
+    - Find the latest version of a package
+    - Search for packages by name
+    - Search for packages by version or version range
+    - Search for packages and filter them using filter settings or filter options
+    - Search for package specifying package ID, or recipe revision
+
+     Examples:
+     - list_conan_packages(name="fmt", version="1.0.0") - List all available versions for fmt/1.0.0 package.
+     - list_conan_packages(name="fmt", filter_settings=["arch=armv8"]) - List all available versions for fmt package with architecture armv8
+     - list_conan_packages(name="fmt", filter_options=["*:fPIC=True"]) - List all available versions for fmt package with fPIC
+
+    Args:
+        name: Package name pattern (required). Supports wildcards:
+            - "fmt" : exact name
+            - "fmt*" : starts with "fmt"
+            - "*fmt*" : contains "fmt"
+            - "*fmt" : ends with "fmt"
+        version: Version or version range (default: "*"). Supports Conan2 syntax:
+            - "1.2.3" : exact version
+            - "[>=1.0 <2.0]" : range >=1.0 and <2.0
+            - "[~1.2]" : compatible with 1.2.x
+            - "[^1.0]" : compatible up to next major
+            - "[>1 <2.0 || ^3.2]" : multiple ranges
+        user: User name (default: None). Use "*" for all users.
+        channel: Channel name (default: None). Use "*" for all channels.
+        recipe_revision: Recipe revision (rrev) (default: None). 
+            Use "*" for all, "latest" for latest.
+            Use it together with package_id to find all packages with the same recipe revision.
+        package_id: Package ID (default: None). Use "*" for all packages.
+            Use "*" when you are trying to find all packages.
+            Use it together with include_all_package_revisions to include all package revisions.
+        filter_settings: Filter by settings (default: None). List of strings:
+            Pass as list of strings, e.g. ["arch=armv8", "os=Windows", "build_type=Release"]
+            - ["arch=armv8"] : architecture
+            - ["os=Windows"] : operating system
+            - ["build_type=Release"] : build type
+            - ["compiler=gcc"] : compiler
+            - ["compiler_version=11"] : compiler version
+            - ["compiler_runtime=libstdc++11"] : compiler runtime
+            - ["compiler_runtime_version=11"] : compiler runtime version
+        filter_options: Filter by options (default: None). List of strings:
+            Pass as list of strings, e.g. ["*:fPIC=True", "*:header_only=True", "*:shared=False", "*:with_boost=True"]
+            - ["*:fPIC=True"] : fPIC option
+            - ["*:header_only=True"] : header only
+            - ["*:shared=False"] : shared library
+            - ["*:with_boost=True"] : with boost option
+        remote: Remote name (default: "*"). 
+            - None: Search in local cache only
+            - "conancenter": Search in ConanCenter remote
+            - "*": Search in all remotes
+            - Other remote names: Search in specific remote
+        search_in_cache: Include local cache in search (default: False). 
+            - True: Search in both remotes and local cache
+            - False: Search only in remotes (default)
+            Note: This parameter should be set consistently across requests.
+        include_all_package_revisions: Include all package revisions (default: False). 
+            - True: Include all package revisions.
+            - False: Include only the latest package revision (default)
+
+    Returns:
+        Dictionary containing available packages and their metadata.
+
+     Examples:
+         - list_conan_packages(name="fmt", version="1.0.0")
+         - list_conan_packages(name="*boost*", filter_settings=["arch=armv8", "os=Windows"])
+         - list_conan_packages(name="zlib", filter_options=["*:shared=True"])
+    """)
+async def list_conan_packages(
+    name: str = Field(description="Package name pattern (supports wildcards)"),
+    version: str = Field(default="*",description=
+        'Version or version range to search for.'
+    ),
+    user: str = Field(default=None, description=
+        'User name. Use * to search all users.'
+    ),
+    channel: str = Field(default=None, description=
+        'Channel name. Use * to search all channels.'
+    ), 
+    recipe_revision: str = Field(default=None,description=
+        'Recipe revision number also know as rrev. Use * to search all revisions. Use "latest" to search the latest revision.'
+    ),
+    package_id: str = Field(default=None, description=
+        'Package ID. Use * to search all packages.'
+    ),
+    filter_settings: list[str] = Field(default=None, description=
+        'Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.'
+    ),
+    filter_options: list[str] = Field(default=None, description=
+        'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
+    ),
+    remote: str = Field(default="*", description=
+        'Name of the remote to search in.'
+    ),
+    search_in_cache: bool = Field(default=False, description="Include local cache in search"),
+    include_all_package_revisions: bool = Field(default=False, description="Include all package revisions")
+) -> dict:
+    if (filter_settings or filter_options) and not package_id:
+        # No package ID provided, searching for all packages
+        package_id = "*"
+
+    pattern =  f"{name}/{version if version else '*'}"
+    pattern += f"@{user if user else '*'}/{channel if channel else '*'}" if user or channel else ''
+    pattern += f"#{recipe_revision}" if recipe_revision else ''
+    if package_id:
+        pattern += f":{package_id}"
+        pattern += f"#*" if include_all_package_revisions else ''
+
+    cmd = ["conan", "list", pattern, "--format=json"]
+    if remote:
+        cmd.extend(["--remote", remote])
+    if filter_settings:
+        for fs in filter_settings:
+            cmd.extend(['-fs', fs])
+    if filter_options:
+        for fo in filter_options:
+            cmd.extend(['-fo', fo])
+    if search_in_cache:
+        cmd.extend(["--cache"])
+    raw_output = await run_command(cmd)
+    return json.loads(raw_output)
+        
+    
 @mcp.tool(
     description="""Get Conan profile configuration.
     
