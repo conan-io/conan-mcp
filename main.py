@@ -271,38 +271,51 @@ async def list_conan_profiles() -> list[str]:
     """
 )
 async def conan_new(
-    template: str = Field(description="Template type for the project. Available templates: basic, cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe, premake_lib, premake_exe, local_recipes_index, workspace"),
+    template: str = Field(
+        description="Template type for the project. Available templates: basic, cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe, premake_lib, premake_exe, local_recipes_index, workspace"
+    ),
     name: str = Field(description="Name of the project"),
     version: str = Field(default="1.0", description="Version of the project"),
-    requires: list[str] = Field(default=[], description="List of dependencies with versions (e.g., ['fmt/12.0.0', 'openssl/3.6.0'])"),
-    output_dir: str = Field(default=".", description="Output directory for the project"),
-    force: bool = Field(default=False, description="Overwrite existing files if they exist")
+    requires: list[str] = Field(
+        default=[],
+        description="List of dependencies with versions (e.g., ['fmt/12.0.0', 'openssl/3.6.0'])",
+    ),
+    output_dir: str = Field(
+        default=".", description="Output directory for the project"
+    ),
+    force: bool = Field(
+        default=False, description="Overwrite existing files if they exist"
+    ),
 ) -> dict:
     """Create a new Conan project with specified dependencies."""
-    
+
     # Build the conan new command
     cmd = ["conan", "new", template]
-    
+
     # Add template arguments
     cmd.extend(["-d", f"name={name}"])
     cmd.extend(["-d", f"version={version}"])
-    
+
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
                 cmd.extend(["-d", f"requires={dep.strip()}"])
-    
+
     # Add output directory
     if output_dir != ".":
         cmd.extend(["-o", output_dir])
-    
+
     # Add force flag if requested
     if force:
         cmd.append("-f")
-    
+
     output = await run_command(cmd)
-    deps_note = f" (IMPORTANT: The generated code contains placeholder examples - you must edit the source files to actually use these dependencies: {', '.join(requires)})" if requires else ""
+    deps_note = (
+        f" (IMPORTANT: The generated code contains placeholder examples - you must edit the source files to actually use these dependencies: {', '.join(requires)})"
+        if requires
+        else ""
+    )
     return {
         "result": f"Project '{name}' created successfully with template '{template}'{deps_note}\n\nOutput:\n{output}"
     }

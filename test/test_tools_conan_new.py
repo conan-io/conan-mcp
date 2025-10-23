@@ -16,21 +16,21 @@ def anyio_backend():
 
 @pytest.fixture
 async def client_session() -> AsyncGenerator[ClientSession]:
-    async with create_connected_server_and_client_session(mcp, raise_exceptions=True) as _session:
+    async with create_connected_server_and_client_session(
+        mcp, raise_exceptions=True
+    ) as _session:
         yield _session
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
+@patch("main.run_command")
 async def test_conan_new_basic(mock_run_command, client_session: ClientSession):
     """Test conan_new with basic parameters."""
     mock_run_command.return_value = "Project created successfully"
 
-    result = await client_session.call_tool("conan_new", {
-        "template": "cmake_exe",
-        "name": "testapp",
-        "version": "1.0"
-    })
+    result = await client_session.call_tool(
+        "conan_new", {"template": "cmake_exe", "name": "testapp", "version": "1.0"}
+    )
 
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -51,19 +51,24 @@ async def test_conan_new_basic(mock_run_command, client_session: ClientSession):
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
-async def test_conan_new_with_dependencies(mock_run_command, client_session: ClientSession):
+@patch("main.run_command")
+async def test_conan_new_with_dependencies(
+    mock_run_command, client_session: ClientSession
+):
     """Test conan_new with dependencies."""
     mock_run_command.return_value = "Project created successfully with dependencies"
 
-    result = await client_session.call_tool("conan_new", {
-        "template": "cmake_lib",
-        "name": "mylib",
-        "version": "2.0",
-        "requires": ["fmt/12.0.0", "openssl/3.6.0"],
-        "output_dir": "/tmp/test",
-        "force": True
-    })
+    result = await client_session.call_tool(
+        "conan_new",
+        {
+            "template": "cmake_lib",
+            "name": "mylib",
+            "version": "2.0",
+            "requires": ["fmt/12.0.0", "openssl/3.6.0"],
+            "output_dir": "/tmp/test",
+            "force": True,
+        },
+    )
 
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -90,16 +95,17 @@ async def test_conan_new_with_dependencies(mock_run_command, client_session: Cli
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
-async def test_conan_new_error_handling(mock_run_command, client_session: ClientSession):
+@patch("main.run_command")
+async def test_conan_new_error_handling(
+    mock_run_command, client_session: ClientSession
+):
     """Test conan_new error handling."""
     mock_run_command.side_effect = RuntimeError("Conan command failed")
 
     # The MCP framework will catch the exception and return an error response
-    result = await client_session.call_tool("conan_new", {
-        "template": "cmake_exe",
-        "name": "testapp"
-    })
+    result = await client_session.call_tool(
+        "conan_new", {"template": "cmake_exe", "name": "testapp"}
+    )
 
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -112,16 +118,16 @@ async def test_conan_new_error_handling(mock_run_command, client_session: Client
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
-async def test_conan_new_empty_dependencies(mock_run_command, client_session: ClientSession):
+@patch("main.run_command")
+async def test_conan_new_empty_dependencies(
+    mock_run_command, client_session: ClientSession
+):
     """Test conan_new with empty dependencies list."""
     mock_run_command.return_value = "Project created successfully"
 
-    result = await client_session.call_tool("conan_new", {
-        "template": "header_lib",
-        "name": "mylib",
-        "requires": []
-    })
+    result = await client_session.call_tool(
+        "conan_new", {"template": "header_lib", "name": "mylib", "requires": []}
+    )
 
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -145,16 +151,21 @@ async def test_conan_new_empty_dependencies(mock_run_command, client_session: Cl
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
-async def test_conan_new_dependency_note_in_output(mock_run_command, client_session: ClientSession):
+@patch("main.run_command")
+async def test_conan_new_dependency_note_in_output(
+    mock_run_command, client_session: ClientSession
+):
     """Test that dependency note appears in output when dependencies are specified."""
     mock_run_command.return_value = "Files created:\n  conanfile.py\n  CMakeLists.txt"
 
-    result = await client_session.call_tool("conan_new", {
-        "template": "cmake_exe",
-        "name": "testapp",
-        "requires": ["fmt/12.0.0", "boost/1.82.0"]
-    })
+    result = await client_session.call_tool(
+        "conan_new",
+        {
+            "template": "cmake_exe",
+            "name": "testapp",
+            "requires": ["fmt/12.0.0", "boost/1.82.0"],
+        },
+    )
 
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -162,7 +173,7 @@ async def test_conan_new_dependency_note_in_output(mock_run_command, client_sess
 
     response_text = result.content[0].text
     assert isinstance(response_text, str)
-    
+
     # Should contain the dependency note
     assert "IMPORTANT" in response_text
     assert "placeholder examples" in response_text
