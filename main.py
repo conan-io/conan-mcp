@@ -261,7 +261,7 @@ async def list_conan_profiles() -> list[str]:
                  autotools_exe, premake_lib, premake_exe, local_recipes_index, 
                  workspace
         name: Name of the project
-        version: Version of the project (default: "1.0")
+        version: Version of the project (default: "0.1")
         requires: List of dependencies with versions (e.g., ['fmt/12.0.0', 
                   'openssl/3.6.0'])
         output_dir: Output directory for the project (default: current directory)
