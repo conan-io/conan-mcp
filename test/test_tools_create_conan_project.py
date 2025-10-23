@@ -43,7 +43,7 @@ async def test_conan_new_with_dependencies(
     mock_run_command.return_value = mock_conan_output
 
     result = await client_session.call_tool(
-        "conan_new",
+        "create_conan_project",
         {
             "template": "cmake_lib",
             "name": "mylib",
@@ -84,7 +84,7 @@ async def test_conan_new_empty_dependencies(
     mock_run_command.return_value = mock_conan_output
 
     result = await client_session.call_tool(
-        "conan_new", {"template": "header_lib", "name": "mylib", "requires": []}
+        "create_conan_project", {"template": "header_lib", "name": "mylib", "requires": []}
     )
 
     assert isinstance(result, CallToolResult)

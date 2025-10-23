@@ -273,7 +273,7 @@ async def list_conan_profiles() -> list[str]:
                   raw output from the conan new command
     """
 )
-async def conan_new(
+async def create_conan_project(
     template: str = Field(description="Template type for the project"),
     name: str = Field(description="Name of the project"),
     version: str = Field(default="0.1", description="Version of the project"),

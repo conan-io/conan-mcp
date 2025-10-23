@@ -57,7 +57,7 @@ Usage examples:
 
 - *"What Conan profiles do I have available?"*
 
-**`conan_new`**
+**`create_conan_project`**
 
 Create a new Conan project with specified dependencies
 
