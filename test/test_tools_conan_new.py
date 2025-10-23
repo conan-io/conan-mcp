@@ -39,7 +39,7 @@ File saved: test_package/src/example.cpp"""
 async def test_conan_new_with_dependencies(
     mock_run_command, client_session: ClientSession, mock_conan_output
 ):
-    """Test conan_new with dependencies."""
+    """Test conan_new with dependencies - verify all arguments are included."""
     mock_run_command.return_value = mock_conan_output
 
     result = await client_session.call_tool(
@@ -47,15 +47,27 @@ async def test_conan_new_with_dependencies(
         {
             "template": "cmake_lib",
             "name": "mylib",
+            "version": "2.0",
             "requires": ["fmt/12.0.0", "openssl/3.6.0"],
+            "output_dir": "/tmp/test",
+            "force": True,
         },
     )
 
     assert isinstance(result, CallToolResult)
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
+    
+    # Verify all expected arguments are present
     assert "conan" in call_args and "new" in call_args and "cmake_lib" in call_args
-    assert "requires=fmt/12.0.0" in call_args and "requires=openssl/3.6.0" in call_args
+    assert "--define" in call_args
+    assert "name=mylib" in call_args
+    assert "version=2.0" in call_args
+    assert "requires=fmt/12.0.0" in call_args
+    assert "requires=openssl/3.6.0" in call_args
+    assert "--output" in call_args
+    assert "/tmp/test" in call_args
+    assert "--force" in call_args
 
     # Verify output is included in result
     response_text = result.content[0].text
@@ -68,7 +80,7 @@ async def test_conan_new_with_dependencies(
 async def test_conan_new_empty_dependencies(
     mock_run_command, client_session: ClientSession, mock_conan_output
 ):
-    """Test conan_new with empty dependencies list."""
+    """Test conan_new with minimal parameters - verify no unnecessary arguments."""
     mock_run_command.return_value = mock_conan_output
 
     result = await client_session.call_tool(
@@ -77,6 +89,18 @@ async def test_conan_new_empty_dependencies(
 
     assert isinstance(result, CallToolResult)
     mock_run_command.assert_called_once()
+    call_args = mock_run_command.call_args[0][0]
+    
+    # Verify only essential arguments are present
+    assert "conan" in call_args and "new" in call_args and "header_lib" in call_args
+    assert "--define" in call_args
+    assert "name=mylib" in call_args
+    assert "version=0.1" in call_args  # Default version is 0.1, not 1.0
+    
+    # Verify unnecessary arguments are NOT present
+    assert not any("requires=" in arg for arg in call_args)  # No requires
+    assert "--output" not in call_args  # No custom output dir
+    assert "--force" not in call_args   # No force flag
 
     # Verify output is included in result
     response_text = result.content[0].text
