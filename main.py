@@ -102,6 +102,71 @@ async def list_conan_profiles() -> list[str]:
     return json.loads(raw_output)
 
 
+@mcp.tool(
+    description="""Create a new Conan project with specified dependencies.
+    
+    This tool creates a new Conan project using templates and automatically adds
+    the specified dependencies. It's perfect for quickly setting up new projects
+    with common libraries like fmt, openssl, boost, etc.
+    
+    Note: The generated source code contains placeholder examples that don't use
+    your specified dependencies. You must manually edit the source files to
+    actually use the libraries you requested.
+    
+    Args:
+        template: Template type for the project. Available templates: basic,
+        cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib,
+        msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe,
+        premake_lib, premake_exe, local_recipes_index, workspace name: Name of
+        the project version: Version of the project (default: "1.0") requires:
+        List of dependencies with versions (e.g., ['fmt/12.0.0',
+        'openssl/3.6.0']) output_dir: Output directory for the project (default:
+        current directory) force: Overwrite existing files if they exist
+        (default: False)
+    
+    Returns:
+        Dictionary with project creation details including output directory and
+        created files.
+    """
+)
+async def conan_new(
+    template: str = Field(description="Template type for the project. Available templates: basic, cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe, premake_lib, premake_exe, local_recipes_index, workspace"),
+    name: str = Field(description="Name of the project"),
+    version: str = Field(default="1.0", description="Version of the project"),
+    requires: list[str] = Field(default=[], description="List of dependencies with versions (e.g., ['fmt/12.0.0', 'openssl/3.6.0'])"),
+    output_dir: str = Field(default=".", description="Output directory for the project"),
+    force: bool = Field(default=False, description="Overwrite existing files if they exist")
+) -> dict:
+    """Create a new Conan project with specified dependencies."""
+    
+    # Build the conan new command
+    cmd = ["conan", "new", template]
+    
+    # Add template arguments
+    cmd.extend(["-d", f"name={name}"])
+    cmd.extend(["-d", f"version={version}"])
+    
+    # Add dependencies if provided
+    if requires:
+        for dep in requires:
+            if dep.strip():  # Skip empty strings
+                cmd.extend(["-d", f"requires={dep.strip()}"])
+    
+    # Add output directory
+    if output_dir != ".":
+        cmd.extend(["-o", output_dir])
+    
+    # Add force flag if requested
+    if force:
+        cmd.append("-f")
+    
+    output = await run_command(cmd)
+    deps_note = f" (IMPORTANT: The generated code contains placeholder examples - you must edit the source files to actually use these dependencies: {', '.join(requires)})" if requires else ""
+    return {
+        "result": f"Project '{name}' created successfully with template '{template}'{deps_note}\n\nOutput:\n{output}"
+    }
+
+
 def main():
     """Main entry point."""
     mcp.run(transport="stdio")
