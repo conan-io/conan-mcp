@@ -94,7 +94,7 @@ async def test_list_conan_filter_options(mock_run_command, client_session: Clien
 
     await client_session.call_tool(
         "list_conan_packages",
-        {"name": "zlib", "filter_options": ["*:fPIC=True", "*:shared=False"], "include_all_package_revision": True}
+        {"name": "zlib", "filter_options": ["*:fPIC=True", "*:shared=False"], "include_all_package_revisions": True}
     )
 
     mock_run_command.assert_called_once()

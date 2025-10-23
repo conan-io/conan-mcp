@@ -85,7 +85,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             Use it together with package_id to find all packages with the same recipe revision.
         package_id: Package ID (default: None). Use "*" for all packages.
             Use "*" when you are trying to find all packages.
-            Use it together with include_all_package_revision to include all package revisions.
+            Use it together with include_all_package_revisions to include all package revisions.
         filter_settings: Filter by settings (default: None). List of strings:
             Pass as list of strings, e.g. ["arch=armv8", "os=Windows", "build_type=Release"]
             - ["arch=armv8"] : architecture
@@ -110,7 +110,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             - True: Search in both remotes and local cache
             - False: Search only in remotes (default)
             Note: This parameter should be set consistently across requests.
-        include_all_package_revision: Include all package revisions (default: False). 
+        include_all_package_revisions: Include all package revisions (default: False). 
             - True: Include all package revisions.
             - False: Include only the latest package revision (default)
 
@@ -149,7 +149,7 @@ async def list_conan_packages(
         'Name of the remote to search in.'
     ),
     search_in_cache: bool = Field(default=False, description="Include local cache in search"),
-    include_all_package_revision: bool = Field(default=False, description="Include all package revisions")
+    include_all_package_revisions: bool = Field(default=False, description="Include all package revisions")
 ) -> dict:
     if (filter_settings or filter_options) and not package_id:
         # No package ID provided, searching for all packages
@@ -160,7 +160,7 @@ async def list_conan_packages(
     pattern += f"#{recipe_revision}" if recipe_revision else ''
     if package_id:
         pattern += f":{package_id}"
-        pattern += f"#*" if include_all_package_revision else ''
+        pattern += f"#*" if include_all_package_revisions else ''
 
     cmd = ["conan", "list", pattern, "--format=json"]
     if remote:
