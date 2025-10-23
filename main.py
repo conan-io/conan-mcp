@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
@@ -87,44 +88,8 @@ async def search_conan_packages(
     return await run_command(cmd)
 
 @mcp.tool(
-    description="Install the requirements specified in a recipe (conanfile.py or conanfile.txt)."
-)
-async def install_conan_packages(
-    path: str = Field(description='Absolute path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py'),
-    remote: str = Field(default=None, description="Remote name. Omit  to search in all remotes."),
-    settings_host: str = Field(
-        default=None,
-        description=(
-            "Apply different settings like architecture, operating system, build type, compiler, "
-            "compiler version, compiler runtime, compiler runtime version to the host profile only. "
-            "Omit to use the settings of the default host profile. "
-            "To use more than one filter setting, use a comma to separate them. "
-            'e.g. "arch=armv8,os=Windows,build_type=Release" - "arch=armv8": architecture, '
-            '"os=Windows": operating system, "build_type=Release": build type, '
-            '"compiler=gcc": compiler, "compiler.version=11": compiler version, '
-            '"compiler.runtime=libstdc++11": compiler runtime, '
-            '"compiler.runtime_version=11": compiler runtime version"'
-        )
-    ),
-    options_host: str = Field(
-        default=None,
-        description=(
-            "Apply options like fPIC, header_only, shared, with_*, without_*, etc. to the host context only. "
-            "Omit to use the options of the default host profile. "
-            "To use more than one filter option, use a comma to separate them. "
-            'e.g. "fPIC=True,header_only=True" - "*:fPIC=True": fPIC, '
-            '"*:header_only=True": header only, "*:shared=False": shared, '
-            '"&:with_boost=True", "&:with_os_api=False": Specify multiple filter options. '
-            'Use "&:fPIC=True" to refer to the current package. '
-            'Use "*:fPIC=True" or other pattern if the intent was to apply to dependencies"'
-        )
-    ),
-    build_missing: bool = Field(
-        default=False,
-        description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download."
-    ),
-) -> str:
-    """Install Conan package dependencies from a recipe file.
+    description="""
+    Install Conan package dependencies from a recipe file (conanfile.py or conanfile.txt).
 
     This tool uses the `conan install` command to install the dependencies of a Conan recipe.
     It provides a complete, structured view of all nodes and relationships in the dependency graph.
@@ -141,10 +106,26 @@ async def install_conan_packages(
                                 settings_host="os=Windows,arch=armv8")
 
     Args:
-        path: Path to a folder containing a recipe or to a recipe file (conanfile.txt/.py)
+        path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py)
         remote: Optional remote name to search in (searches all remotes if not specified)
         settings_host: Substitute settings from the default host profile (architecture, OS, etc.)
+            Omit to use the settings of the default host profile.
+            e.g. ["arch=armv8", "os=Windows", "build_type=Release"] 
+            - "arch=armv8": architecture,
+            - "os=Windows": operating system, 
+            - "build_type=Release": build type,
+            - "compiler=gcc": compiler,
+            - "compiler.version=11": compiler version,
+            - "compiler.runtime=libstdc++11": compiler runtime,
+            - "compiler.runtime_version=11": compiler runtime version'
         options_host: Substitute options from the default host profile (fPIC, shared, etc.)
+            Omit to use the options of the default host profile.
+            e.g. ["fPIC=True", "shared=False"]
+            - "Use "&:fPIC=True" to refer to the current package. "
+            - "Use "*:fPIC=True" or other pattern if the intent was to apply to dependencies"
+            - "*:fPIC=True": fPIC for all packages,
+            - "&:shared=False": shared for the current package,
+            - "*:with_boost=True": with boost option for all packages,
         build_missing: Build missing binary dependencies from source
 
     Returns:
@@ -159,6 +140,27 @@ async def install_conan_packages(
         - Download: Recipe/binary was downloaded
         - null: Binary unknown (e.g., consumer conanfile.txt)
     """
+)
+async def install_conan_packages(
+    path: str = Field(description='Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py'),
+    remote: str = Field(default=None, description="Remote name. Omit  to search in all remotes."),
+    settings_host: list[str] = Field(
+        default=None,
+        description=(
+            "Apply different settings like architecture, operating system, build type, compiler, "
+        )
+    ),
+    options_host: list[str] = Field(
+        default=None,
+        description=(
+            "Apply options like fPIC, header_only, shared, with_*, without_*, etc. to the host context only. "
+        )
+    ),
+    build_missing: bool = Field(
+        default=False,
+        description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download."
+    ),
+) -> dict:
 
     cmd = ["conan", "install", path]
 
@@ -180,7 +182,8 @@ async def install_conan_packages(
 
     cmd.extend(["--format=json"])
 
-    return await run_command(cmd, timeout=timeout)
+    raw_output = await run_command(cmd, timeout=timeout)
+    return json.loads(raw_output)
 
 
 def main():
