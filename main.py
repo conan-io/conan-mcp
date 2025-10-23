@@ -9,13 +9,13 @@ mcp = FastMCP("conan-mcp")
 
 async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
     """Execute a command and return the output.
-    
+
     Args:
         cmd: List of command arguments (e.g., ["conan", "search", "boost"])
-        
+
     Returns:
         Command output as string
-        
+
     Raises:
         RuntimeError: If command is not found or fails
     """
@@ -25,7 +25,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            stdin=asyncio.subprocess.DEVNULL
+            stdin=asyncio.subprocess.DEVNULL,
         )
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
 
@@ -49,8 +49,9 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
     except Exception as e:
         raise RuntimeError(f"Error running command: {str(e)}")
 
-        
-@mcp.tool(description="""
+
+@mcp.tool(
+    description="""
     Search for Conan packages across remotes with fine-grained filtering.
 
     Use this tool when you need to:
@@ -121,62 +122,72 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
          - list_conan_packages(name="fmt", version="1.0.0")
          - list_conan_packages(name="*boost*", filter_settings=["arch=armv8", "os=Windows"])
          - list_conan_packages(name="zlib", filter_options=["*:shared=True"])
-    """)
+    """
+)
 async def list_conan_packages(
     name: str = Field(description="Package name pattern (supports wildcards)"),
-    version: str = Field(default="*",description=
-        'Version or version range to search for.'
+    version: str = Field(
+        default="*", description="Version or version range to search for."
     ),
-    user: str = Field(default=None, description=
-        'User name. Use * to search all users.'
+    user: str = Field(
+        default=None, description="User name. Use * to search all users."
     ),
-    channel: str = Field(default=None, description=
-        'Channel name. Use * to search all channels.'
-    ), 
-    recipe_revision: str = Field(default=None,description=
-        'Recipe revision number also know as rrev. Use * to search all revisions. Use "latest" to search the latest revision.'
+    channel: str = Field(
+        default=None, description="Channel name. Use * to search all channels."
     ),
-    package_id: str = Field(default=None, description=
-        'Package ID. Use * to search all packages.'
+    recipe_revision: str = Field(
+        default=None,
+        description='Recipe revision number also know as rrev. Use * to search all revisions. Use "latest" to search the latest revision.',
     ),
-    filter_settings: list[str] = Field(default=None, description=
-        'Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.'
+    package_id: str = Field(
+        default=None, description="Package ID. Use * to search all packages."
     ),
-    filter_options: list[str] = Field(default=None, description=
-        'Filter options like fPIC, header_only, shared, with_*, without_*, etc.'
+    filter_settings: list[str] = Field(
+        default=None,
+        description="Filter settings like architecture, operating system, build type, compiler, compiler version, compiler runtime, compiler runtime version.",
     ),
-    remote: str = Field(default="*", description=
-        'Name of the remote to search in.'
+    filter_options: list[str] = Field(
+        default=None,
+        description="Filter options like fPIC, header_only, shared, with_*, without_*, etc.",
     ),
-    search_in_cache: bool = Field(default=False, description="Include local cache in search"),
-    include_all_package_revisions: bool = Field(default=False, description="Include all package revisions")
+    remote: str = Field(default="*", description="Name of the remote to search in."),
+    search_in_cache: bool = Field(
+        default=False, description="Include local cache in search"
+    ),
+    include_all_package_revisions: bool = Field(
+        default=False, description="Include all package revisions"
+    ),
 ) -> dict:
     if (filter_settings or filter_options) and not package_id:
         # No package ID provided, searching for all packages
         package_id = "*"
 
-    pattern =  f"{name}/{version if version else '*'}"
-    pattern += f"@{user if user else '*'}/{channel if channel else '*'}" if user or channel else ''
-    pattern += f"#{recipe_revision}" if recipe_revision else ''
+    pattern = f"{name}/{version if version else '*'}"
+    pattern += (
+        f"@{user if user else '*'}/{channel if channel else '*'}"
+        if user or channel
+        else ""
+    )
+    pattern += f"#{recipe_revision}" if recipe_revision else ""
     if package_id:
         pattern += f":{package_id}"
-        pattern += f"#*" if include_all_package_revisions else ''
+        pattern += "#*" if include_all_package_revisions else ""
 
     cmd = ["conan", "list", pattern, "--format=json"]
     if remote:
         cmd.extend(["--remote", remote])
     if filter_settings:
         for fs in filter_settings:
-            cmd.extend(['-fs', fs])
+            cmd.extend(["-fs", fs])
     if filter_options:
         for fo in filter_options:
-            cmd.extend(['-fo', fo])
+            cmd.extend(["-fo", fo])
     if search_in_cache:
         cmd.extend(["--cache"])
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
-        
-    
+
+
 @mcp.tool(
     description="""Get Conan profile configuration.
     
@@ -205,7 +216,10 @@ async def list_conan_packages(
     """
 )
 async def get_conan_profile(
-    profile: str = Field(default=None, description="Specific profile name to retrieve. If not provided, uses the default profile.")
+    profile: str = Field(
+        default=None,
+        description="Specific profile name to retrieve. If not provided, uses the default profile.",
+    ),
 ) -> dict:
     cmd = ["conan", "profile", "show", "--format=json"]
     if profile:
@@ -223,7 +237,7 @@ async def get_conan_profile(
         List of profile names.
     """
 )
-async def list_conan_profiles() -> list[str]:    
+async def list_conan_profiles() -> list[str]:
     cmd = ["conan", "profile", "list", "--format=json"]
     raw_output = await run_command(cmd)
     return json.loads(raw_output)

@@ -16,24 +16,25 @@ def anyio_backend():
 
 @pytest.fixture
 async def client_session() -> AsyncGenerator[ClientSession]:
-    async with create_connected_server_and_client_session(mcp, raise_exceptions=True) as _session:
+    async with create_connected_server_and_client_session(
+        mcp, raise_exceptions=True
+    ) as _session:
         yield _session
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
-async def test_get_conan_profile_default(mock_run_command, client_session: ClientSession):
+@patch("main.run_command")
+async def test_get_conan_profile_default(
+    mock_run_command, client_session: ClientSession
+):
     """Test get_conan_profile with default profile."""
     # Minimal conan profile response
-    mock_profile = {
-        "host": {"settings": {}},
-        "build": {"settings": {}}
-    }
+    mock_profile = {"host": {"settings": {}}, "build": {"settings": {}}}
     mock_run_command.return_value = str(mock_profile).replace("'", '"')
 
     # Test calling the tool without profile parameter
     result = await client_session.call_tool("get_conan_profile", {})
-    
+
     # Check that we get a valid response structure
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -55,19 +56,20 @@ async def test_get_conan_profile_default(mock_run_command, client_session: Clien
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
-async def test_get_conan_profile_specific(mock_run_command, client_session: ClientSession):
+@patch("main.run_command")
+async def test_get_conan_profile_specific(
+    mock_run_command, client_session: ClientSession
+):
     """Test get_conan_profile with specific profile."""
     # Minimal conan profile response
-    mock_profile = {
-        "host": {"settings": {}},
-        "build": {"settings": {}}
-    }
+    mock_profile = {"host": {"settings": {}}, "build": {"settings": {}}}
     mock_run_command.return_value = str(mock_profile).replace("'", '"')
 
     # Test calling the tool with specific profile
-    result = await client_session.call_tool("get_conan_profile", {"profile": "linux-debug"})
-    
+    result = await client_session.call_tool(
+        "get_conan_profile", {"profile": "linux-debug"}
+    )
+
     # Check that we get a valid response structure
     assert isinstance(result, CallToolResult)
     assert len(result.content) > 0
@@ -90,16 +92,10 @@ async def test_get_conan_profile_specific(mock_run_command, client_session: Clie
 
 
 @pytest.mark.anyio
-@patch('main.run_command')
+@patch("main.run_command")
 async def test_list_conan_profiles(mock_run_command, client_session: ClientSession):
     """Test listing conan profiles successfully."""
-    mock_response = {
-        "local": [
-            "default",
-            "linux-debug",
-            "macos-release"
-        ]
-    }
+    mock_response = {"local": ["default", "linux-debug", "macos-release"]}
     mock_run_command.return_value = str(mock_response).replace("'", '"')
 
     result = await client_session.call_tool("list_conan_profiles", {})
