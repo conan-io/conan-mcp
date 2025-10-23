@@ -256,29 +256,32 @@ async def list_conan_profiles() -> list[str]:
     
     Args:
         template: Template type for the project. Available templates: basic,
-        cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib,
-        msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe,
-        premake_lib, premake_exe, local_recipes_index, workspace name: Name of
-        the project version: Version of the project (default: "1.0") requires:
-        List of dependencies with versions (e.g., ['fmt/12.0.0',
-        'openssl/3.6.0']) output_dir: Output directory for the project (default:
-        current directory) force: Overwrite existing files if they exist
-        (default: False)
+                 cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, 
+                 msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, 
+                 autotools_exe, premake_lib, premake_exe, local_recipes_index, 
+                 workspace
+        name: Name of the project
+        version: Version of the project (default: "1.0")
+        requires: List of dependencies with versions (e.g., ['fmt/12.0.0', 
+                  'openssl/3.6.0'])
+        output_dir: Output directory for the project (default: current directory)
+        force: Overwrite existing files if they exist (default: False)
     
     Returns:
-        Dictionary with project creation details including output directory and
-        created files.
+        Dictionary containing:
+        - result: Success message with project details, dependency note, and 
+                  raw output from the conan new command
     """
 )
 async def conan_new(
     template: str = Field(
-        description="Template type for the project. Available templates: basic, cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe, premake_lib, premake_exe, local_recipes_index, workspace"
+        description="Template type for the project"
     ),
     name: str = Field(description="Name of the project"),
-    version: str = Field(default="1.0", description="Version of the project"),
+    version: str = Field(default="0.1", description="Version of the project"),
     requires: list[str] = Field(
-        default=[],
-        description="List of dependencies with versions (e.g., ['fmt/12.0.0', 'openssl/3.6.0'])",
+        default=None,
+        description="List of dependencies with versions",
     ),
     output_dir: str = Field(
         default=".", description="Output directory for the project"
@@ -293,22 +296,22 @@ async def conan_new(
     cmd = ["conan", "new", template]
 
     # Add template arguments
-    cmd.extend(["-d", f"name={name}"])
-    cmd.extend(["-d", f"version={version}"])
-
+    cmd.extend(["--define", f"name={name}"])
+    cmd.extend(["--define", f"version={version}"])
+    
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend(["-d", f"requires={dep.strip()}"])
-
+                cmd.extend(["--define", f"requires={dep.strip()}"])
+    
     # Add output directory
     if output_dir != ".":
-        cmd.extend(["-o", output_dir])
-
+        cmd.extend(["--output", output_dir])
+    
     # Add force flag if requested
     if force:
-        cmd.append("-f")
+        cmd.append("--force")
 
     output = await run_command(cmd)
     deps_note = (

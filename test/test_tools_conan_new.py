@@ -45,7 +45,7 @@ async def test_conan_new_basic(mock_run_command, client_session: ClientSession):
     assert "conan" in call_args
     assert "new" in call_args
     assert "cmake_exe" in call_args
-    assert "-d" in call_args
+    assert "--define" in call_args
     assert "name=testapp" in call_args
     assert "version=1.0" in call_args
 
@@ -83,15 +83,15 @@ async def test_conan_new_with_dependencies(
     assert "conan" in call_args
     assert "new" in call_args
     assert "cmake_lib" in call_args
-    assert "-d" in call_args
+    assert "--define" in call_args
     assert "name=mylib" in call_args
     assert "version=2.0" in call_args
-    # Check that each dependency is added as a separate -d requires= parameter
+    # Check that each dependency is added as a separate --define requires= parameter
     assert "requires=fmt/12.0.0" in call_args
     assert "requires=openssl/3.6.0" in call_args
-    assert "-o" in call_args
+    assert "--output" in call_args
     assert "/tmp/test" in call_args
-    assert "-f" in call_args
+    assert "--force" in call_args
 
 
 @pytest.mark.anyio
@@ -145,6 +145,7 @@ async def test_conan_new_empty_dependencies(
     assert "conan" in call_args
     assert "new" in call_args
     assert "header_lib" in call_args
+    assert "--define" in call_args
     assert "name=mylib" in call_args
     # Should not have any requires parameters
     assert not any("requires=" in arg for arg in call_args)
