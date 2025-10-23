@@ -247,8 +247,8 @@ async def list_conan_profiles() -> list[str]:
     description="""Create a new Conan project with specified dependencies.
     
     This tool creates a new Conan project using templates and automatically adds
-    the specified dependencies. It's perfect for quickly setting up new projects
-    with common libraries like fmt, openssl, boost, etc.
+    the specified dependencies. Useful for setting up new projects with common
+    libraries like fmt, openssl, boost, etc.
     
     Note: The generated code contains placeholder examples. You need to review
     and update: includes/imports, source code usage, and build system targets
