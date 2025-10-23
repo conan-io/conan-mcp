@@ -250,9 +250,9 @@ async def list_conan_profiles() -> list[str]:
     the specified dependencies. It's perfect for quickly setting up new projects
     with common libraries like fmt, openssl, boost, etc.
     
-    Note: The generated source code contains placeholder examples that don't use
-    your specified dependencies. You must manually edit the source files to
-    actually use the libraries you requested.
+    Note: The generated code contains placeholder examples. You need to review
+    and update: includes/imports, source code usage, and build system targets
+    (CMakeLists.txt, meson.build, etc.) to properly use your specified dependencies.
     
     Args:
         template: Template type for the project. Available templates: basic,
@@ -315,7 +315,7 @@ async def conan_new(
 
     output = await run_command(cmd)
     deps_note = (
-        f" (IMPORTANT: The generated code contains placeholder examples - you must edit the source files to actually use these dependencies: {', '.join(requires)})"
+        f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"
         if requires
         else ""
     )
