@@ -83,6 +83,30 @@ Usage examples:
 - *"List versions of poco provided by user barbarian and channel stable in local cache"*
 - *"Provide all packages for zlib 1.3 that use the recipe at revision b3b71bfe8dd07abc7b82ff2bd0eac021 in conancenter"*   
 
+**`install_conan_packages`**
+
+**`install_conan_packages`**
+
+Install all dependencies of a Conan recipe, producing a full dependency graph. 
+
+Parameters:
+- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`.
+- `remote` (optional): Name of the remote to search for dependencies. If omitted, all remotes are searched.
+- `no_remote`(optional): Do not use remote, resolve exclusively in the cache.
+- `settings_host` (optional): List of settings (host context) to override. Example: `["arch=armv8", "os=Windows", "build_type=Release"]`
+- `options_host` (optional): List of options (host context) to override. Example: `["fPIC=True", "shared=False"]`
+- `build_missing` (optional): Boolean, build missing binary dependencies from source if not available (`false` by default).
+
+Usage examples:
+- *"Install dependencies in this project's"*
+- *"Install dependencies from ~/project using conancenter"*
+- *"Install dependencies from ~/project using just the cache"*
+- *"Install dependencies from ~/project search in all remotes"*
+- *"Install dependencies from ~/project for architecture armv8, compiler gcc, and shared=False"*
+- *"Install dependencies from ~/project using conancenter and build the missing binaries"*
+
+
+
 
 
 ## Local Development

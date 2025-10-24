@@ -264,6 +264,7 @@ async def list_conan_profiles() -> list[str]:
     Args:
         path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py)
         remote: Optional remote name to search in (searches all remotes if not specified)
+        search_in_cache: Do not use remote, resolve exclusively in the cache.
         settings_host: Substitute settings from the default host profile (architecture, OS, etc.)
             Omit to use the settings of the default host profile.
             e.g. ["arch=armv8", "os=Windows", "build_type=Release"] 
@@ -302,7 +303,10 @@ async def install_conan_packages(
         description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
     ),
     remote: str = Field(
-        default=None, description="Remote name. Omit  to search in all remotes."
+        default="*", description="Remote name. Omit  to search in all remotes."
+    ),
+    search_in_cache: bool = Field(
+        default=False, description="Do not use remote, resolve exclusively in the cache."
     ),
     settings_host: list[str] = Field(
         default=None,
@@ -321,10 +325,13 @@ async def install_conan_packages(
         description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download.",
     ),
 ) -> dict:
-    cmd = ["conan", "install", path, "--format=json"]
+    cmd = ["conan", "install", path]
 
-    if remote:
+    if remote and not search_in_cache:
         cmd.extend(["--remote", remote])
+    
+    if search_in_cache:
+        cmd.extend(["--no-remote"])
 
     if settings_host:
         for sh in settings_host:

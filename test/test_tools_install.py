@@ -83,8 +83,8 @@ async def test_install_conan_packages_with_settings_and_options(
         "install_conan_packages",
         {
             "path": "/home/user/project/conanfile.py",
-            "settings_host": "os=Linux,arch=armv8,compiler=gcc,compiler.version=11",
-            "options_host": "fPIC=True,shared=False",
+            "settings_host": ["os=Linux", "arch=armv8", "compiler=gcc", "compiler.version=11"],
+            "options_host": ["fPIC=True", "shared=False"],
             "build_missing": True,
         },
     )
