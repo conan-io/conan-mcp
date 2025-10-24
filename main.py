@@ -303,7 +303,7 @@ async def install_conan_packages(
         description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
     ),
     remote: str = Field(
-        default="*", description="Remote name. Omit  to search in all remotes."
+        default=None, description="Remote name. Omit  to search in all remotes."
     ),
     search_in_cache: bool = Field(
         default=False, description="Do not use remote, resolve exclusively in the cache."
