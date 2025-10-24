@@ -83,7 +83,12 @@ async def test_install_conan_packages_with_settings_and_options(
         "install_conan_packages",
         {
             "path": "/home/user/project/conanfile.py",
-            "settings_host": ["os=Linux", "arch=armv8", "compiler=gcc", "compiler.version=11"],
+            "settings_host": [
+                "os=Linux",
+                "arch=armv8",
+                "compiler=gcc",
+                "compiler.version=11",
+            ],
             "options_host": ["fPIC=True", "shared=False"],
             "build_missing": True,
         },
@@ -116,3 +121,38 @@ async def test_install_conan_packages_with_settings_and_options(
     # Verify timeout was set to 300.0 for build_missing=True
     call_kwargs = mock_run_command.call_args[1]
     assert call_kwargs.get("timeout") == 300.0
+
+
+@pytest.mark.anyio
+@patch("main.run_command")
+async def test_install_conan_packages_with_profiles(
+    mock_run_command, client_session: ClientSession
+):
+    """Test install with specific remote - command composition."""
+    mock_run_command.return_value = '{"result": "success"}'
+
+    await client_session.call_tool(
+        "install_conan_packages",
+        {
+            "path": "/path/to/project/conanfile.py",
+            "build_profiles": ["linux-debug", "gcc-11"],
+            "host_profiles": ["Windows-msvc193-x86_64-Release"],
+        },
+    )
+
+    # Verify the command was composed correctly with remote
+    mock_run_command.assert_called_once()
+    call_args = mock_run_command.call_args[0][0]
+    expected_cmd = [
+        "conan",
+        "install",
+        "/path/to/project/conanfile.py",
+        "-pr:b",
+        "linux-debug",
+        "-pr:b",
+        "gcc-11",
+        "-pr:h",
+        "Windows-msvc193-x86_64-Release",
+        "--format=json",
+    ]
+    assert call_args == expected_cmd
