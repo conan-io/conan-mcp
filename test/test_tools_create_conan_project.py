@@ -115,4 +115,3 @@ async def test_conan_new_empty_dependencies(
     response_text = result.content[0].text
     assert "File saved: CMakeLists.txt" in response_text
     assert "WARNING" not in response_text  # No warning for empty dependencies
-

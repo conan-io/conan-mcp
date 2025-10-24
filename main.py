@@ -324,7 +324,7 @@ async def create_conan_project(
         cmd.append("--force")
 
     output = await run_command(cmd)
-    
+
     deps_note = (
         f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"
         if requires
