@@ -66,6 +66,7 @@ Parameters:
 - `name` (required): Name of the project
 - `version` (optional): Version of the project (default: "1.0")
 - `requires` (optional): List of dependencies with versions (e.g., ["fmt/12.0.0", "openssl/3.6.0"])
+- `tool_requires` (optional): List of tool dependencies with versions (e.g., ["cmake/3.28.0", "ninja/1.11.1"])
 - `output_dir` (optional): Output directory for the project (default: current directory)
 - `force` (optional): Overwrite existing files if they exist (default: False)
 
@@ -74,6 +75,7 @@ Usage examples:
 - *"Create a new CMake executable project called 'myapp' with fmt and openssl dependencies"*
 - *"Create a header-only library project called 'mylib'"*
 - *"Create a Meson executable project with gtest and spdlog dependencies"*
+- *"Create a CMake library project with boost dependencies and cmake tool_requires"*
 
 **`list_conan_packages`**
 

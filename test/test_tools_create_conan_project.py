@@ -39,7 +39,7 @@ File saved: test_package/src/example.cpp"""
 async def test_conan_new_with_dependencies(
     mock_run_command, client_session: ClientSession, mock_conan_output
 ):
-    """Test conan_new with dependencies - verify all arguments are included."""
+    """Test conan_new with dependencies and tool_requires - verify all arguments are included."""
     mock_run_command.return_value = mock_conan_output
 
     result = await client_session.call_tool(
@@ -49,6 +49,7 @@ async def test_conan_new_with_dependencies(
             "name": "mylib",
             "version": "2.0",
             "requires": ["fmt/12.0.0", "openssl/3.6.0"],
+            "tool_requires": ["cmake/3.28.0", "ninja/1.11.1"],
             "output_dir": "/tmp/test",
             "force": True,
         },
@@ -65,14 +66,21 @@ async def test_conan_new_with_dependencies(
     assert "version=2.0" in call_args
     assert "requires=fmt/12.0.0" in call_args
     assert "requires=openssl/3.6.0" in call_args
+    assert "tool_requires=cmake/3.28.0" in call_args
+    assert "tool_requires=ninja/1.11.1" in call_args
     assert "--output" in call_args
     assert "/tmp/test" in call_args
     assert "--force" in call_args
 
-    # Verify output is included in result
+    # Verify output is included in result and warning includes only requires (not tool_requires)
     response_text = result.content[0].text
     assert "File saved: CMakeLists.txt" in response_text
-    assert "WARNING" in response_text and "fmt/12.0.0" in response_text
+    assert "WARNING" in response_text
+    assert "fmt/12.0.0" in response_text
+    assert "openssl/3.6.0" in response_text
+    # tool_requires should NOT appear in the warning
+    assert "cmake/3.28.0" not in response_text
+    assert "ninja/1.11.1" not in response_text
 
 
 @pytest.mark.anyio
@@ -107,3 +115,4 @@ async def test_conan_new_empty_dependencies(
     response_text = result.content[0].text
     assert "File saved: CMakeLists.txt" in response_text
     assert "WARNING" not in response_text  # No warning for empty dependencies
+

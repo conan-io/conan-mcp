@@ -264,6 +264,8 @@ async def list_conan_profiles() -> list[str]:
         version: Version of the project (default: "0.1")
         requires: List of dependencies with versions (e.g., ['fmt/12.0.0', 
                   'openssl/3.6.0'])
+        tool_requires: List of tool dependencies with versions (e.g., 
+                      ['cmake/3.28.0', 'ninja/1.11.1'])
         output_dir: Output directory for the project (default: current directory)
         force: Overwrite existing files if they exist (default: False)
     
@@ -280,6 +282,10 @@ async def create_conan_project(
     requires: list[str] = Field(
         default=None,
         description="List of dependencies with versions",
+    ),
+    tool_requires: list[str] = Field(
+        default=None,
+        description="List of tool dependencies with versions",
     ),
     output_dir: str = Field(
         default=".", description="Output directory for the project"
@@ -303,6 +309,12 @@ async def create_conan_project(
             if dep.strip():  # Skip empty strings
                 cmd.extend(["--define", f"requires={dep.strip()}"])
 
+    # Add tool dependencies if provided
+    if tool_requires:
+        for dep in tool_requires:
+            if dep.strip():  # Skip empty strings
+                cmd.extend(["--define", f"tool_requires={dep.strip()}"])
+
     # Add output directory
     if output_dir != ".":
         cmd.extend(["--output", output_dir])
@@ -312,6 +324,7 @@ async def create_conan_project(
         cmd.append("--force")
 
     output = await run_command(cmd)
+    
     deps_note = (
         f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"
         if requires
