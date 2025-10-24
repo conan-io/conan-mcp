@@ -321,17 +321,17 @@ async def install_conan_packages(
         description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download.",
     ),
 ) -> dict:
-    cmd = ["conan", "install", path]
+    cmd = ["conan", "install", path, "--format=json"]
 
     if remote:
         cmd.extend(["--remote", remote])
 
     if settings_host:
-        for setting in settings_host.split(","):
-            cmd.extend(["-s:h", setting.strip()])
+        for sh in settings_host:
+            cmd.extend(["-s:h", sh])
     if options_host:
-        for option in options_host.split(","):
-            cmd.extend(["-o:h", option.strip()])
+        for oh in options_host:
+            cmd.extend(["-o:h", oh])
 
     timeout = 90.0
 
