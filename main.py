@@ -255,11 +255,25 @@ async def list_conan_profiles() -> list[str]:
     (CMakeLists.txt, meson.build, etc.) to properly use your specified dependencies.
     
     Args:
-        template: Template type for the project. Available templates: basic,
-                 cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, 
-                 msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, 
-                 autotools_exe, premake_lib, premake_exe, local_recipes_index, 
-                 workspace
+        template: Template type for the project.
+                  
+                  Libraries (produce libraries to be linked):
+                  - cmake_lib: CMake library (default for libraries)
+                  - header_lib: Header-only library
+                  - meson_lib: Meson build system
+                  - msbuild_lib: Visual Studio / MSBuild (Windows only)
+                  - bazel_lib: Bazel build system (experimental)
+                  - autotools_lib: Autotools (configure/make)
+                  
+                  Executables (programs that can be run):
+                  - cmake_exe: CMake executable (default for executables)
+                  - meson_exe: Meson build system
+                  - msbuild_exe: Visual Studio / MSBuild (Windows only)
+                  - bazel_exe: Bazel build system (experimental)
+                  - autotools_exe: Autotools (configure/make)
+                  
+                  Note: If the user doesn't specify build system, use cmake_lib
+                  for libraries or cmake_exe for executables as defaults.
         name: Name of the project
         version: Version of the project (default: "0.1")
         requires: List of dependencies with versions (e.g., ['fmt/12.0.0', 
@@ -276,7 +290,7 @@ async def list_conan_profiles() -> list[str]:
     """
 )
 async def create_conan_project(
-    template: str = Field(description="Template type for the project"),
+    template: str = Field(description="Template type for the project. If not specified, use cmake_lib for libraries or cmake_exe for executables"),
     name: str = Field(description="Name of the project"),
     version: str = Field(default="0.1", description="Version of the project"),
     requires: list[str] = Field(

@@ -62,7 +62,9 @@ Usage examples:
 Create a new Conan project with specified dependencies
 
 Parameters:
-- `template` (required): Template type for the project. Available templates: basic, cmake_lib, cmake_exe, header_lib, meson_lib, meson_exe, msbuild_lib, msbuild_exe, bazel_lib, bazel_exe, autotools_lib, autotools_exe, premake_lib, premake_exe, local_recipes_index, workspace
+- `template` (required): Template type for the project.
+  - Libraries: `cmake_lib` (default), `header_lib`, `meson_lib`, `msbuild_lib`, `bazel_lib`, `autotools_lib`
+  - Executables: `cmake_exe` (default), `meson_exe`, `msbuild_exe`, `bazel_exe`, `autotools_exe`
 - `name` (required): Name of the project
 - `version` (optional): Version of the project (default: "1.0")
 - `requires` (optional): List of dependencies with versions (e.g., ["fmt/12.0.0", "openssl/3.6.0"])
