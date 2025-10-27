@@ -57,6 +57,28 @@ Usage examples:
 
 - *"What Conan profiles do I have available?"*
 
+**`create_conan_project`**
+
+Create a new Conan project with specified dependencies
+
+Parameters:
+- `template` (required): Template type for the project.
+  - Libraries: `cmake_lib` (default), `header_lib`, `meson_lib`, `msbuild_lib`, `bazel_lib`, `autotools_lib`
+  - Executables: `cmake_exe` (default), `meson_exe`, `msbuild_exe`, `bazel_exe`, `autotools_exe`
+- `name` (required): Name of the project
+- `version` (optional): Version of the project (default: "1.0")
+- `requires` (optional): List of dependencies with versions (e.g., ["fmt/12.0.0", "openssl/3.6.0"])
+- `tool_requires` (optional): List of tool dependencies (e.g., ["cmake/4.1.2", "ninja/1.13.1", "meson/1.9.1"])
+- `output_dir` (optional): Output directory for the project (default: current directory)
+- `force` (optional): Overwrite existing files if they exist (default: False)
+
+Usage examples:
+
+- *"Create a new CMake executable project called 'myapp' with fmt and openssl dependencies"*
+- *"Create a header-only library project called 'mylib'"*
+- *"Create a Meson executable project with gtest and spdlog dependencies"*
+- *"Create a CMake library project with boost dependencies and cmake tool_requires"*
+
 **`list_conan_packages`**
 
 List recipes and packages from the local cache or configurated remotes
