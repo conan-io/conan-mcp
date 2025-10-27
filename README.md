@@ -68,7 +68,7 @@ Parameters:
 - `name` (required): Name of the project
 - `version` (optional): Version of the project (default: "1.0")
 - `requires` (optional): List of dependencies with versions (e.g., ["fmt/12.0.0", "openssl/3.6.0"])
-- `tool_requires` (optional): List of tool dependencies with versions (e.g., ["cmake/3.28.0", "ninja/1.11.1"])
+- `tool_requires` (optional): List of tool dependencies (e.g., ["cmake/4.1.2", "ninja/1.13.1", "meson/1.9.1"])
 - `output_dir` (optional): Output directory for the project (default: current directory)
 - `force` (optional): Overwrite existing files if they exist (default: False)
 

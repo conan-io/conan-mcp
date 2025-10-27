@@ -278,8 +278,10 @@ async def list_conan_profiles() -> list[str]:
         version: Version of the project (default: "0.1")
         requires: List of dependencies with versions (e.g., ['fmt/12.0.0', 
                   'openssl/3.6.0'])
-        tool_requires: List of tool dependencies with versions (e.g., 
-                      ['cmake/3.28.0', 'ninja/1.11.1'])
+        tool_requires: List of tool dependencies with versions. Common examples:
+                      - ['cmake/4.1.2'] - CMake build tool
+                      - ['ninja/1.13.1'] - Ninja build system
+                      - ['meson/1.9.1'] - Meson build system
         output_dir: Output directory for the project (default: current directory)
         force: Overwrite existing files if they exist (default: False)
     
@@ -299,7 +301,7 @@ async def create_conan_project(
     ),
     tool_requires: list[str] = Field(
         default=None,
-        description="List of tool dependencies with versions",
+        description="List of tool dependencies with versions. Common examples: ['cmake/4.1.2'], ['ninja/1.13.1'], ['meson/1.9.1']",
     ),
     output_dir: str = Field(
         default=".", description="Output directory for the project"
