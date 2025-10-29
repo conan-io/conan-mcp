@@ -367,6 +367,113 @@ async def install_conan_packages(
 
     raw_output = await run_command(cmd, timeout=timeout)
     return json.loads(raw_output)
+  
+@mcp.tool(
+    description="""Create a new Conan project with specified dependencies.
+    
+    This tool creates a new Conan project using templates and automatically adds
+    the specified dependencies. Useful for setting up new projects with common
+    libraries like fmt, openssl, boost, etc.
+    
+    Note: The generated code contains placeholder examples. You need to review
+    and update: includes/imports, source code usage, and build system targets
+    (CMakeLists.txt, meson.build, etc.) to properly use your specified dependencies.
+    
+    Args:
+        template: Template type for the project.
+                  
+                  Libraries (produce libraries to be linked):
+                  - cmake_lib: CMake library (default for libraries)
+                  - header_lib: Header-only library
+                  - meson_lib: Meson build system
+                  - msbuild_lib: Visual Studio / MSBuild (Windows only)
+                  - bazel_lib: Bazel build system (experimental)
+                  - autotools_lib: Autotools (configure/make)
+                  
+                  Executables (programs that can be run):
+                  - cmake_exe: CMake executable (default for executables)
+                  - meson_exe: Meson build system
+                  - msbuild_exe: Visual Studio / MSBuild (Windows only)
+                  - bazel_exe: Bazel build system (experimental)
+                  - autotools_exe: Autotools (configure/make)
+                  
+                  Note: If the user doesn't specify build system, use cmake_lib
+                  for libraries or cmake_exe for executables as defaults.
+        name: Name of the project
+        version: Version of the project (default: "0.1")
+        requires: List of dependencies with versions (e.g., ['fmt/12.0.0', 
+                  'openssl/3.6.0'])
+        tool_requires: List of tool dependencies with versions. Common examples:
+                      - ['cmake/4.1.2'] - CMake build tool
+                      - ['ninja/1.13.1'] - Ninja build system
+                      - ['meson/1.9.1'] - Meson build system
+        output_dir: Output directory for the project (default: current directory)
+        force: Overwrite existing files if they exist (default: False)
+    
+    Returns:
+        Dictionary containing:
+        - result: Success message with project details, dependency note, and 
+                  raw output from the conan new command
+    """
+)
+async def create_conan_project(
+    template: str = Field(description="Template type for the project. If not specified, use cmake_lib for libraries or cmake_exe for executables"),
+    name: str = Field(description="Name of the project"),
+    version: str = Field(default="0.1", description="Version of the project"),
+    requires: list[str] = Field(
+        default=None,
+        description="List of dependencies with versions",
+    ),
+    tool_requires: list[str] = Field(
+        default=None,
+        description="List of tool dependencies with versions. Common examples: ['cmake/4.1.2'], ['ninja/1.13.1'], ['meson/1.9.1']",
+    ),
+    output_dir: str = Field(
+        default=".", description="Output directory for the project"
+    ),
+    force: bool = Field(
+        default=False, description="Overwrite existing files if they exist"
+    ),
+) -> dict:
+    """Create a new Conan project with specified dependencies."""
+
+    # Build the conan new command
+    cmd = ["conan", "new", template]
+
+    # Add template arguments
+    cmd.extend(["--define", f"name={name}"])
+    cmd.extend(["--define", f"version={version}"])
+
+    # Add dependencies if provided
+    if requires:
+        for dep in requires:
+            if dep.strip():  # Skip empty strings
+                cmd.extend(["--define", f"requires={dep.strip()}"])
+
+    # Add tool dependencies if provided
+    if tool_requires:
+        for dep in tool_requires:
+            if dep.strip():  # Skip empty strings
+                cmd.extend(["--define", f"tool_requires={dep.strip()}"])
+
+    # Add output directory
+    if output_dir != ".":
+        cmd.extend(["--output", output_dir])
+
+    # Add force flag if requested
+    if force:
+        cmd.append("--force")
+
+    output = await run_command(cmd)
+
+    deps_note = (
+        f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"
+        if requires
+        else ""
+    )
+    return {
+        "result": f"Project '{name}' created successfully with template '{template}'{deps_note}\n\nOutput:\n{output}"
+    }
 
 
 def main():
