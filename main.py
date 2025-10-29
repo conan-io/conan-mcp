@@ -265,10 +265,8 @@ async def list_conan_profiles() -> list[str]:
         path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py)
         remote: Optional remote name to search in (searches all remotes if not specified)
         search_in_cache: Do not use remote, resolve exclusively in the cache.
-        build_profiles: List of profiles to apply to the build context. They will be applied in the order they are provided.
-            e.g. ["linux-debug", "gcc-11"]
-        host_profiles: List of profiles to apply to the host context. They will be applied in the order they are provided.
-            e.g. ["linux-debug", "gcc-11"]
+        build_profile: Profile to the build context.
+        host_profile: Profile to the host context.
         settings_host: Substitute settings from the default host profile (architecture, OS, etc.)
             Omit to use the settings of the default host profile.
             e.g. ["arch=armv8", "os=Windows", "build_type=Release"] 
@@ -313,13 +311,13 @@ async def install_conan_packages(
         default=False,
         description="Do not use remote, resolve exclusively in the cache.",
     ),
-    build_profiles: list[str] = Field(
+    build_profile: str = Field(
         default=None,
-        description="List of profiles to apply to the build context. They will be applied in the order they are provided.",
+        description="Profile to the build context.",
     ),
-    host_profiles: list[str] = Field(
+    host_profile: str = Field(
         default=None,
-        description="List of profiles to apply to the host context. They will be applied in the order they are provided.",
+        description="Profile to the host context.",
     ),
     settings_host: list[str] = Field(
         default=None,
@@ -346,13 +344,11 @@ async def install_conan_packages(
     if search_in_cache:
         cmd.extend(["--no-remote"])
 
-    if build_profiles:
-        for profile in build_profiles:
-            cmd.extend(["-pr:b", profile])
+    if build_profile:
+        cmd.extend(["-pr:b", build_profile])
 
-    if host_profiles:
-        for profile in host_profiles:
-            cmd.extend(["-pr:h", profile])
+    if host_profile:
+        cmd.extend(["-pr:h", host_profile])
 
     if settings_host:
         for sh in settings_host:

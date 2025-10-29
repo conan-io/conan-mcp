@@ -125,7 +125,7 @@ async def test_install_conan_packages_with_settings_and_options(
 
 @pytest.mark.anyio
 @patch("main.run_command")
-async def test_install_conan_packages_with_profiles(
+async def test_install_conan_packages_with_profile(
     mock_run_command, client_session: ClientSession
 ):
     """Test install with specific remote - command composition."""
@@ -135,8 +135,8 @@ async def test_install_conan_packages_with_profiles(
         "install_conan_packages",
         {
             "path": "/path/to/project/conanfile.py",
-            "build_profiles": ["linux-debug", "gcc-11"],
-            "host_profiles": ["Windows-msvc193-x86_64-Release"],
+            "build_profile": "linux-debug",
+            "host_profile": "Windows-msvc193-x86_64-Release",
         },
     )
 
@@ -149,8 +149,6 @@ async def test_install_conan_packages_with_profiles(
         "/path/to/project/conanfile.py",
         "-pr:b",
         "linux-debug",
-        "-pr:b",
-        "gcc-11",
         "-pr:h",
         "Windows-msvc193-x86_64-Release",
         "--format=json",
