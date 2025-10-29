@@ -120,12 +120,8 @@ Parameters:
 - `build_missing` (optional): Boolean, build missing binary dependencies from source if not available (`false` by default).
 
 Usage examples:
-- *"Install dependencies in this project"*
-- *"Install dependencies from ~/project using conancenter"*
-- *"Install dependencies from ~/project using just the cache"*
-- *"Install dependencies from ~/project search in all remotes"*
-- *"Install dependencies from ~/project for architecture armv8, compiler gcc, and shared=False"*
-- *"Install dependencies from ~/project using conancenter and build the missing binaries"*
+- *"Install dependencies in this project using conancenter"*
+- *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
 
