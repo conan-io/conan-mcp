@@ -256,9 +256,9 @@ async def list_conan_profiles() -> list[str]:
     some dependencies, it will error unless the 'build_missing' argument is used to build from source.
 
     Examples:
-        - install_conan_packages(path="C:/Users/dani/project/conanfile.txt")
+        - install_conan_packages(path="C:/Users/username/project/conanfile.txt")
         - install_conan_packages(path="~/folder/conanfile.py", remote="conancenter")
-        - install_conan_packages(path="/home/dani/project/conanfile.py",
+        - install_conan_packages(path="/home/username/project/conanfile.py",
                                 settings_host="os=Windows,arch=armv8")
 
     Args:
