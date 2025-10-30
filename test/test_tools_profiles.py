@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncGenerator
 from unittest.mock import patch
 
@@ -113,3 +114,16 @@ async def test_list_conan_profiles(mock_run_command, client_session: ClientSessi
     assert "profile" in call_args
     assert "list" in call_args
     assert "--format=json" in call_args
+
+
+@pytest.mark.anyio
+@patch("conan_mcp.main.run_command")
+async def test_profile_tools_use_custom_conan_binary(mock_run_command, client_session: ClientSession):
+    """Test that profile tools use CONAN_MCP_CONAN_PATH if set."""
+    mock_run_command.return_value = '{"local": ["default"]}'
+    custom_path = "/custom/path/conan"
+    
+    with patch.dict(os.environ, {"CONAN_MCP_CONAN_PATH": custom_path}, clear=False):
+        await client_session.call_tool("get_conan_profile", {})
+        call_args = mock_run_command.call_args[0][0]
+        assert call_args[0] == custom_path
