@@ -5,7 +5,7 @@ import pytest
 from mcp.client.session import ClientSession
 from mcp.shared.memory import create_connected_server_and_client_session
 
-from main import mcp
+from conan_mcp.main import mcp
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ async def client_session() -> AsyncGenerator[ClientSession]:
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_basic(mock_run_command, client_session: ClientSession):
     """Only name and version"""
     mock_run_command.return_value = '{"result": "success"}'
@@ -38,7 +38,7 @@ async def test_list_conan_basic(mock_run_command, client_session: ClientSession)
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSession):
     """Define name, version, user and channel"""
     mock_run_command.return_value = '{"result": "success"}'
@@ -55,7 +55,7 @@ async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSe
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_rrev_pid_prev(
     mock_run_command, client_session: ClientSession
 ):
@@ -89,7 +89,7 @@ async def test_list_conan_rrev_pid_prev(
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_filter_options(
     mock_run_command, client_session: ClientSession
 ):
@@ -123,7 +123,7 @@ async def test_list_conan_filter_options(
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_filter_settings(
     mock_run_command, client_session: ClientSession
 ):

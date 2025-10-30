@@ -6,7 +6,7 @@ from mcp.client.session import ClientSession
 from mcp.shared.memory import create_connected_server_and_client_session
 from mcp.types import CallToolResult, TextContent
 
-from main import mcp
+from conan_mcp.main import mcp
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ async def client_session() -> AsyncGenerator[ClientSession]:
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_get_conan_profile_default(
     mock_run_command, client_session: ClientSession
 ):
@@ -56,7 +56,7 @@ async def test_get_conan_profile_default(
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_get_conan_profile_specific(
     mock_run_command, client_session: ClientSession
 ):
@@ -92,7 +92,7 @@ async def test_get_conan_profile_specific(
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_profiles(mock_run_command, client_session: ClientSession):
     """Test listing conan profiles successfully."""
     mock_response = {"local": ["default", "linux-debug", "macos-release"]}
