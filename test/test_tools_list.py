@@ -153,7 +153,7 @@ async def test_list_conan_filter_settings(
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_list_conan_change_remote(
     mock_run_command, client_session: ClientSession
 ):
