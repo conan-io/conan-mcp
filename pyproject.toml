@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.16.0",
+    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -14,7 +15,10 @@ test = [
 ]
 
 [project.scripts]
-conan-mcp = "main:main"
+conan-mcp = "conan_mcp.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
