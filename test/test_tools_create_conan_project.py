@@ -6,7 +6,7 @@ from mcp.client.session import ClientSession
 from mcp.shared.memory import create_connected_server_and_client_session
 from mcp.types import CallToolResult, TextContent
 
-from main import mcp
+from conan_mcp.main import mcp
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ File saved: test_package/src/example.cpp"""
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_conan_new_with_dependencies(
     mock_run_command, client_session: ClientSession, mock_conan_output
 ):
@@ -84,7 +84,7 @@ async def test_conan_new_with_dependencies(
 
 
 @pytest.mark.anyio
-@patch("main.run_command")
+@patch("conan_mcp.main.run_command")
 async def test_conan_new_empty_dependencies(
     mock_run_command, client_session: ClientSession, mock_conan_output
 ):

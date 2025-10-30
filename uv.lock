@@ -71,6 +71,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },
+    { name = "pydantic" },
 ]
 
 [package.optional-dependencies]
@@ -81,6 +82,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", extras = ["cli"], specifier = ">=1.16.0" },
+    { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
 ]
 provides-extras = ["test"]
