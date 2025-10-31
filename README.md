@@ -87,10 +87,11 @@ Parameters:
   - Libraries: `cmake_lib` (default), `header_lib`, `meson_lib`, `msbuild_lib`, `bazel_lib`, `autotools_lib`
   - Executables: `cmake_exe` (default), `meson_exe`, `msbuild_exe`, `bazel_exe`, `autotools_exe`
 - `name` (required): Name of the project
-- `version` (optional): Version of the project (default: "1.0")
+- `version` (optional): Version of the project (default: "0.1")
 - `requires` (optional): List of dependencies with versions (e.g., ["fmt/12.0.0", "openssl/3.6.0"])
 - `tool_requires` (optional): List of tool dependencies (e.g., ["cmake/4.1.2", "ninja/1.13.1", "meson/1.9.1"])
-- `output_dir` (optional): Output directory for the project (default: current directory)
+- `output_dir` (optional): Output directory for the project, relative to work_dir (default: ".")
+- `work_dir` (**required**): Working directory where the command should be executed. This is the base directory from which all paths are resolved.
 - `force` (optional): Overwrite existing files if they exist (default: False)
 
 Usage examples:
@@ -128,14 +129,13 @@ Usage examples:
 
 **`install_conan_packages`**
 
-**`install_conan_packages`**
-
 Install all dependencies of a Conan recipe, producing a full dependency graph. 
 
 Parameters:
-- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`.
+- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`. This path is ALWAYS relative to `work_dir`.
+- `work_dir` (**required**): Working directory where the command should be executed. This is the base directory from which all paths are resolved.
 - `remote` (optional): Name of the remote to search for dependencies. If omitted, all remotes are searched.
-- `no_remote`(optional): Do not use remote, resolve exclusively in the cache.
+- `search_in_cache` (optional): Do not use remote, resolve exclusively in the cache.
 - `settings_host` (optional): List of settings (host context) to override. Example: `["arch=armv8", "os=Windows", "build_type=Release"]`
 - `options_host` (optional): List of options (host context) to override. Example: `["fPIC=True", "shared=False"]`
 - `build_missing` (optional): Boolean, build missing binary dependencies from source if not available (`false` by default).

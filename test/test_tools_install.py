@@ -23,14 +23,15 @@ async def client_session() -> ClientSession:
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
+@patch("pathlib.Path.mkdir")
 async def test_install_conan_packages_basic(
-    mock_run_command, client_session: ClientSession
+    mock_mkdir, mock_run_command, client_session: ClientSession
 ):
     """Test basic install functionality - command composition."""
     mock_run_command.return_value = '{"result": "success"}'
 
     await client_session.call_tool(
-        "install_conan_packages", {"path": "/path/to/conanfile.txt"}
+        "install_conan_packages", {"path": "conanfile.txt", "work_dir": "/path/to"}
     )
 
     # Verify the command was composed correctly
@@ -46,15 +47,16 @@ async def test_install_conan_packages_basic(
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
+@patch("pathlib.Path.mkdir")
 async def test_install_conan_packages_with_remote(
-    mock_run_command, client_session: ClientSession
+    mock_mkdir, mock_run_command, client_session: ClientSession
 ):
     """Test install with specific remote - command composition."""
     mock_run_command.return_value = '{"result": "success"}'
 
     await client_session.call_tool(
         "install_conan_packages",
-        {"path": "/path/to/project/conanfile.py", "remote": "conancenter"},
+        {"path": "conanfile.py", "work_dir": "/path/to/project", "remote": "conancenter"},
     )
 
     # Verify the command was composed correctly with remote
@@ -73,8 +75,9 @@ async def test_install_conan_packages_with_remote(
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
+@patch("pathlib.Path.mkdir")
 async def test_install_conan_packages_with_settings_and_options(
-    mock_run_command, client_session: ClientSession
+    mock_mkdir, mock_run_command, client_session: ClientSession
 ):
     """Test install with settings_host and options_host parameters - command composition."""
     mock_run_command.return_value = '{"result": "success"}'
@@ -82,7 +85,8 @@ async def test_install_conan_packages_with_settings_and_options(
     await client_session.call_tool(
         "install_conan_packages",
         {
-            "path": "/home/user/project/conanfile.py",
+            "path": "conanfile.py",
+            "work_dir": "/home/user/project",
             "settings_host": [
                 "os=Linux",
                 "arch=armv8",
@@ -125,8 +129,9 @@ async def test_install_conan_packages_with_settings_and_options(
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
+@patch("pathlib.Path.mkdir")
 async def test_install_conan_packages_with_profile(
-    mock_run_command, client_session: ClientSession
+    mock_mkdir, mock_run_command, client_session: ClientSession
 ):
     """Test install with specific remote - command composition."""
     mock_run_command.return_value = '{"result": "success"}'
@@ -134,7 +139,8 @@ async def test_install_conan_packages_with_profile(
     await client_session.call_tool(
         "install_conan_packages",
         {
-            "path": "/path/to/project/conanfile.py",
+            "path": "conanfile.py",
+            "work_dir": "/path/to/project",
             "build_profile": "linux-debug",
             "host_profile": "Windows-msvc193-x86_64-Release",
         },
