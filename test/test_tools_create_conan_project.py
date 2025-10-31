@@ -69,7 +69,9 @@ async def test_conan_new_with_dependencies(
     assert "requires=openssl/3.6.0" in call_args
     assert "tool_requires=cmake/3.28.0" in call_args
     assert "tool_requires=ninja/1.11.1" in call_args
-    assert "--output" not in call_args  # No output_dir anymore, project created directly in work_dir
+    assert (
+        "--output" not in call_args
+    )  # No output_dir anymore, project created directly in work_dir
     assert "--force" in call_args
 
     # Verify output is included in result and warning includes only requires (not tool_requires)
