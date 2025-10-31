@@ -145,8 +145,15 @@ Usage examples:
 - *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
+**`audit_conan_scan`**
 
+Scan Conan packages and dependencies for security vulnerabilities
 
+Parameters:
+- `path` (**required**): Path to the folder containing the recipe or to a `conanfile.txt`/`conanfile.py`.
+
+Usage examples:
+- *"Scan dependencies in this project for known vulnerabilities"*
 
 
 ## Local Development
