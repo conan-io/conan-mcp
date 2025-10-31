@@ -440,9 +440,8 @@ async def install_conan_packages(
                       - ['cmake/4.1.2'] - CMake build tool
                       - ['ninja/1.13.1'] - Ninja build system
                       - ['meson/1.9.1'] - Meson build system
-        output_dir: Output directory for the project, relative to work_dir (default: ".")
         work_dir: Working directory where the command should be executed. 
-                 This is the base directory from which all paths are resolved.
+                 The project will be created directly in this directory.
                  Always required.
         force: Overwrite existing files if they exist (default: False)
     
@@ -466,12 +465,8 @@ async def create_conan_project(
         default=None,
         description="List of tool dependencies with versions. Common examples: ['cmake/4.1.2'], ['ninja/1.13.1'], ['meson/1.9.1']",
     ),
-    output_dir: str = Field(
-        default=".",
-        description="Output directory for the project, relative to work_dir",
-    ),
     work_dir: str = Field(
-        description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
+        description="Working directory where the command should be executed. The project will be created directly in this directory. Always required."
     ),
     force: bool = Field(
         default=False, description="Overwrite existing files if they exist"
@@ -482,16 +477,6 @@ async def create_conan_project(
     # Expand ~ in work_dir and ensure it exists
     base_work_dir = Path(work_dir).expanduser()
     base_work_dir.mkdir(parents=True, exist_ok=True)
-
-    # Resolve output_dir relative to work_dir
-    if output_dir == ".":
-        actual_work_dir = base_work_dir
-        output_name = None
-    else:
-        output_path = base_work_dir / output_dir
-        actual_work_dir = output_path.parent
-        output_name = output_path.name
-        actual_work_dir.mkdir(parents=True, exist_ok=True)
 
     # Build the conan new command
     cmd = [_get_conan_binary(), "new", template]
@@ -512,17 +497,11 @@ async def create_conan_project(
             if dep.strip():  # Skip empty strings
                 cmd.extend(["--define", f"tool_requires={dep.strip()}"])
 
-    # Add output directory (relative to actual_work_dir) only if specified
-    if output_name is not None:
-        cmd.extend(["--output", output_name])
-
     # Add force flag if requested
     if force:
         cmd.append("--force")
 
-    output = await run_command(
-        cmd, cwd=str(actual_work_dir) if actual_work_dir else None
-    )
+    output = await run_command(cmd, cwd=str(base_work_dir))
 
     deps_note = (
         f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"
