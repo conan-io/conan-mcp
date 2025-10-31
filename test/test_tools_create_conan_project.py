@@ -120,12 +120,16 @@ async def test_conan_new_empty_dependencies(
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
-async def test_create_project_uses_custom_conan_binary(mock_run_command, client_session: ClientSession, mock_conan_output):
+async def test_create_project_uses_custom_conan_binary(
+    mock_run_command, client_session: ClientSession, mock_conan_output
+):
     """Test that create_conan_project uses CONAN_MCP_CONAN_PATH if set."""
     mock_run_command.return_value = mock_conan_output
     custom_path = "/custom/path/conan"
-    
+
     with patch.dict(os.environ, {"CONAN_MCP_CONAN_PATH": custom_path}, clear=False):
-        await client_session.call_tool("create_conan_project", {"template": "cmake_lib", "name": "test"})
+        await client_session.call_tool(
+            "create_conan_project", {"template": "cmake_lib", "name": "test"}
+        )
         call_args = mock_run_command.call_args[0][0]
         assert call_args[0] == custom_path

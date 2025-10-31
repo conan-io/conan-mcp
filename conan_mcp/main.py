@@ -10,7 +10,7 @@ mcp = FastMCP("conan-mcp")
 
 def _get_conan_binary() -> str:
     """Get the Conan binary path from environment variable or default to 'conan'.
-    
+
     Returns:
         Path to conan binary. Defaults to 'conan' if CONAN_MCP_CONAN_PATH is not set.
     """

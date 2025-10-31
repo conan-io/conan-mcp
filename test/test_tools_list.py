@@ -180,11 +180,13 @@ async def test_list_conan_change_remote(
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
-async def test_list_packages_uses_custom_conan_binary(mock_run_command, client_session: ClientSession):
+async def test_list_packages_uses_custom_conan_binary(
+    mock_run_command, client_session: ClientSession
+):
     """Test that list_conan_packages uses CONAN_MCP_CONAN_PATH if set."""
     mock_run_command.return_value = '{"result": "success"}'
     custom_path = "/custom/path/conan"
-    
+
     with patch.dict(os.environ, {"CONAN_MCP_CONAN_PATH": custom_path}, clear=False):
         await client_session.call_tool("list_conan_packages", {"name": "foo"})
         call_args = mock_run_command.call_args[0][0]
