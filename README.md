@@ -32,6 +32,27 @@ Add to your `mcp.json`:
 }
 ```
 
+#### Configuring Conan Binary Path
+
+By default, the server uses `conan` from the system PATH (or the virtual environment where the MCP server is running). If you need to use a specific Conan installation or version, you can set the `CONAN_MCP_CONAN_PATH` environment variable in your MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "conan": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/conan-mcp", "run", "conan-mcp"],
+      "env": {
+        "CONAN_MCP_CONAN_PATH": "/home/user/venv/bin/conan"
+      }
+    }
+  }
+}
+```
+
+If `CONAN_MCP_CONAN_PATH` is not set, the server will use `conan` from PATH or
+the virtual environment where the MCP server is running.
+
 ### Available Tools
 
 **`get_conan_profile`**: 

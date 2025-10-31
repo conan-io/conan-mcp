@@ -1,10 +1,20 @@
 import asyncio
 import json
+import os
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
 mcp = FastMCP("conan-mcp")
+
+
+def _get_conan_binary() -> str:
+    """Get the Conan binary path from environment variable or default to 'conan'.
+    
+    Returns:
+        Path to conan binary. Defaults to 'conan' if CONAN_MCP_CONAN_PATH is not set.
+    """
+    return os.environ.get("CONAN_MCP_CONAN_PATH", "conan")
 
 
 async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
@@ -173,7 +183,7 @@ async def list_conan_packages(
         pattern += f":{package_id}"
         pattern += "#*" if include_all_package_revisions else ""
 
-    cmd = ["conan", "list", pattern, "--format=json"]
+    cmd = [_get_conan_binary(), "list", pattern, "--format=json"]
     if remote:
         cmd.extend(["--remote", remote])
     if filter_settings:
@@ -221,7 +231,7 @@ async def get_conan_profile(
         description="Specific profile name to retrieve. If not provided, uses the default profile.",
     ),
 ) -> dict:
-    cmd = ["conan", "profile", "show", "--format=json"]
+    cmd = [_get_conan_binary(), "profile", "show", "--format=json"]
     if profile:
         cmd.extend(["--profile", profile])
     raw_output = await run_command(cmd)
@@ -238,7 +248,7 @@ async def get_conan_profile(
     """
 )
 async def list_conan_profiles() -> list[str]:
-    cmd = ["conan", "profile", "list", "--format=json"]
+    cmd = [_get_conan_binary(), "profile", "list", "--format=json"]
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
@@ -441,7 +451,7 @@ async def create_conan_project(
     """Create a new Conan project with specified dependencies."""
 
     # Build the conan new command
-    cmd = ["conan", "new", template]
+    cmd = [_get_conan_binary(), "new", template]
 
     # Add template arguments
     cmd.extend(["--define", f"name={name}"])
