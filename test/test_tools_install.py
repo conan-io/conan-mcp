@@ -56,7 +56,11 @@ async def test_install_conan_packages_with_remote(
 
     await client_session.call_tool(
         "install_conan_packages",
-        {"path": "conanfile.py", "work_dir": "/path/to/project", "remote": "conancenter"},
+        {
+            "path": "conanfile.py",
+            "work_dir": "/path/to/project",
+            "remote": "conancenter",
+        },
     )
 
     # Verify the command was composed correctly with remote

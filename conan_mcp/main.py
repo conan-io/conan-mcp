@@ -18,7 +18,9 @@ def _get_conan_binary() -> str:
     return os.environ.get("CONAN_MCP_CONAN_PATH", "conan")
 
 
-async def run_command(cmd: list[str], timeout: float = 30.0, cwd: str | None = None) -> str:
+async def run_command(
+    cmd: list[str], timeout: float = 30.0, cwd: str | None = None
+) -> str:
     """Execute a command and return the output.
 
     Args:
@@ -361,10 +363,10 @@ async def install_conan_packages(
     # Expand ~ in work_dir and ensure it exists
     base_work_dir = Path(work_dir).expanduser()
     base_work_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Path is always relative to work_dir
     actual_path = str(base_work_dir / path)
-    
+
     cmd = [_get_conan_binary(), "install", actual_path]
 
     if remote and not search_in_cache:
@@ -465,7 +467,8 @@ async def create_conan_project(
         description="List of tool dependencies with versions. Common examples: ['cmake/4.1.2'], ['ninja/1.13.1'], ['meson/1.9.1']",
     ),
     output_dir: str = Field(
-        default=".", description="Output directory for the project, relative to work_dir"
+        default=".",
+        description="Output directory for the project, relative to work_dir",
     ),
     work_dir: str = Field(
         description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
@@ -479,7 +482,7 @@ async def create_conan_project(
     # Expand ~ in work_dir and ensure it exists
     base_work_dir = Path(work_dir).expanduser()
     base_work_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Resolve output_dir relative to work_dir
     if output_dir == ".":
         actual_work_dir = base_work_dir
@@ -517,7 +520,9 @@ async def create_conan_project(
     if force:
         cmd.append("--force")
 
-    output = await run_command(cmd, cwd=str(actual_work_dir) if actual_work_dir else None)
+    output = await run_command(
+        cmd, cwd=str(actual_work_dir) if actual_work_dir else None
+    )
 
     deps_note = (
         f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"

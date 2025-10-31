@@ -130,7 +130,8 @@ async def test_create_project_uses_custom_conan_binary(
 
     with patch.dict(os.environ, {"CONAN_MCP_CONAN_PATH": custom_path}, clear=False):
         await client_session.call_tool(
-            "create_conan_project", {"template": "cmake_lib", "name": "test", "work_dir": "/tmp"}
+            "create_conan_project",
+            {"template": "cmake_lib", "name": "test", "work_dir": "/tmp"},
         )
         call_args = mock_run_command.call_args[0][0]
         assert call_args[0] == custom_path
