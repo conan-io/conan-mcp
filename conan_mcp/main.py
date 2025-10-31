@@ -367,7 +367,8 @@ async def install_conan_packages(
 
     raw_output = await run_command(cmd, timeout=timeout)
     return json.loads(raw_output)
-  
+
+
 @mcp.tool(
     description="""Create a new Conan project with specified dependencies.
     
@@ -417,7 +418,9 @@ async def install_conan_packages(
     """
 )
 async def create_conan_project(
-    template: str = Field(description="Template type for the project. If not specified, use cmake_lib for libraries or cmake_exe for executables"),
+    template: str = Field(
+        description="Template type for the project. If not specified, use cmake_lib for libraries or cmake_exe for executables"
+    ),
     name: str = Field(description="Name of the project"),
     version: str = Field(default="0.1", description="Version of the project"),
     requires: list[str] = Field(
