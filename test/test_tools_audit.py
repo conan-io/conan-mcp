@@ -29,7 +29,7 @@ async def test_audit_conan_scan(
     mock_run_command.return_value = '{"result": "success"}'
 
     await client_session.call_tool(
-        "audit_conan_scan", {"path": "/path/to/conanfile.txt"}
+        "audit_conan_scan", {"path": "/path/to/conanfile.txt", "work_dir": "/path/to/project"}
     )
 
     # Verify the command was composed correctly

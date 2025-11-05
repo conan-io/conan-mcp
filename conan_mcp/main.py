@@ -514,19 +514,27 @@ async def create_conan_project(
 
 @mcp.tool(
     description="""
-    ⚠️ COST WARNING: This tool makes an API call to the Conan API which may incur costs. Only use when explicitly requested by the user.
+    ⚠️ WARNING: This tool makes an API call to the Conan API. Only use when explicitly requested by the user.
 
     A token is required to use this tool. If you dont have it yet you can get it by signing up for a free at https://audit.conan.io/register
 
     Audit a Conan project for security vulnerabilities.
     There is a limit of 100 API calls per day. If the limit is reached, the tool will return an error.
+    Args:
+        work_dir: Working directory where the command should be executed. Always required.
+        path: Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py
+    Returns:
+        Dictionary containing the result of the audit scan.
     """
 )
 async def audit_conan_scan(
-    path: str = Field(description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"),
+    work_dir: str = Field(description="Working directory where the command should be executed. Always required."),
+    path: str = Field(description="Path to the folder relative to working directory containing the recipe of the project or to a recipe file conanfile.txt/.py"),
 ) -> dict:
-    cmd = ["conan", "audit", "scan", path, "--format", "json"]
-    raw_output = await run_command(cmd)
+    base_work_dir = Path(work_dir).expanduser()
+    actual_path = str(base_work_dir / path)
+    cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format", "json"]
+    raw_output = await run_command(cmd, cwd=str(Path(work_dir)))
     return json.loads(raw_output)
 
 
