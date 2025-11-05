@@ -36,6 +36,7 @@ async def test_check_licenses_basic_command_composition(
             "nodes": {
                 "0": {
                     "ref": "conanfile",
+                    "recipe": "Consumer",
                     "context": "host",
                     "license": None,
                     "dependencies": {
@@ -51,12 +52,14 @@ async def test_check_licenses_basic_command_composition(
                 },
                 "1": {
                     "ref": "fmt/10.0.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "MIT",
                     "dependencies": {},
                 },
                 "2": {
                     "ref": "zlib/1.2.13",
+                    "recipe": "Cache",
                     "context": "host",
                     "license": "Zlib",
                     "dependencies": {},
@@ -99,6 +102,7 @@ async def test_check_licenses_with_profiles_and_remote(
             "nodes": {
                 "0": {
                     "ref": "conanfile",
+                    "recipe": "Consumer",
                     "context": "host",
                     "license": None,
                     "dependencies": {
@@ -110,6 +114,7 @@ async def test_check_licenses_with_profiles_and_remote(
                 },
                 "1": {
                     "ref": "boost/1.84.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "BSL-1.0",
                     "dependencies": {},
@@ -168,6 +173,7 @@ async def test_check_licenses_filters_host_context_only(
             "nodes": {
                 "0": {
                     "ref": "conanfile",
+                    "recipe": "Consumer",
                     "context": "host",
                     "license": None,
                     "dependencies": {
@@ -183,24 +189,28 @@ async def test_check_licenses_filters_host_context_only(
                 },
                 "1": {
                     "ref": "fmt/10.0.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "MIT",
                     "dependencies": {},
                 },
                 "2": {
                     "ref": "cmake/3.28.0",
+                    "recipe": "Cache",
                     "context": "build",
                     "license": "BSD-3-Clause",
                     "dependencies": {},
                 },
                 "3": {
                     "ref": "zlib/1.2.13",
+                    "recipe": "Cache",
                     "context": "host",
                     "license": "Zlib",
                     "dependencies": {},
                 },
                 "4": {
                     "ref": "ninja/1.13.0",
+                    "recipe": "Cache",
                     "context": "build",
                     "license": "Apache-2.0",
                     "dependencies": {},
@@ -246,6 +256,7 @@ async def test_check_licenses_classifies_licenses_correctly(
             "nodes": {
                 "0": {
                     "ref": "conanfile",
+                    "recipe": "Consumer",
                     "context": "host",
                     "license": None,
                     "dependencies": {
@@ -277,36 +288,42 @@ async def test_check_licenses_classifies_licenses_correctly(
                 },
                 "1": {
                     "ref": "fmt/10.0.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "MIT",
                     "dependencies": {},
                 },
                 "2": {
                     "ref": "openssl/3.2.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "Apache-2.0",
                     "dependencies": {},
                 },
                 "3": {
                     "ref": "gpl-library/1.0.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "GPL-3.0",
                     "dependencies": {},
                 },
                 "4": {
                     "ref": "agpl-library/2.0.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "AGPL-3.0",
                     "dependencies": {},
                 },
                 "5": {
                     "ref": "unknown-library/1.0.0",
+                    "recipe": "Downloaded",
                     "context": "host",
                     "license": "Custom-License",
                     "dependencies": {},
                 },
                 "6": {
                     "ref": "no-license-library/1.0.0",
+                    "recipe": "Cache",
                     "context": "host",
                     "license": None,
                     "dependencies": {},

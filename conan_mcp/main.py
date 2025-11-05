@@ -612,10 +612,10 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
         if context != "host":
             continue
 
-        ref = node_data.get("ref")
+        recipe = node_data.get("recipe")
         # Skip the root conanfile node (not a dependency)
         # TODO: Check the root conanfile license compatibility with the policy and the dependencies licenses
-        if ref == "conanfile":
+        if recipe == "Consumer":
             continue
 
         # Try multiple ways to get license information
@@ -630,6 +630,7 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
         else:
             license_str = None
 
+        ref = node_data.get("ref")
         licenses_map[ref] = {
             "license": license_str,
             "package": ref,
