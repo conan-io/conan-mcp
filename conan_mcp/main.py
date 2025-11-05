@@ -604,42 +604,27 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
     """
     licenses_map = {}
 
-    # Try different possible structures in the graph JSON
-    nodes = graph_data.get("graph", {}).get("nodes", [])
-    if not nodes:
-        # Alternative structure
-        nodes = graph_data.get("nodes", [])
+    nodes = graph_data.get("graph", {}).get("nodes", {})
 
-    for node in nodes:
+    for node_id, node_data in nodes.items():
         # Only process nodes in the "host" context (skip build context nodes)
-        context = node.get("context") or node.get("recipe", {}).get("context")
+        context = node_data.get("context")
         if context != "host":
             continue
 
-        # Try multiple ways to get the package reference
-        ref = (
-            node.get("ref")
-            or node.get("reference")
-            or node.get("id")
-            or node.get("package_id")
-            or "unknown"
-        )
+        ref = node_data.get("ref")
+        # Skip the root conanfile node (not a dependency)
+        # TODO: Check the root conanfile license compatibility with the policy and the dependencies licenses
+        if ref == "conanfile":
+            continue
 
         # Try multiple ways to get license information
-        license_info = (
-            node.get("license")
-            or node.get("licenses")
-            or node.get("recipe", {}).get("license")
-            or node.get("recipe", {}).get("licenses")
-        )
+        license_info = node_data.get("license")
 
         # Handle license as string, list, or dict
         if isinstance(license_info, list):
             # Join multiple licenses with " OR " or ", " depending on context
             license_str = " OR ".join(str(l) for l in license_info if l)
-        elif isinstance(license_info, dict):
-            # If it's a dict, try to extract the license string
-            license_str = license_info.get("name") or str(license_info)
         elif license_info:
             license_str = str(license_info)
         else:

@@ -33,18 +33,41 @@ async def test_check_licenses_basic_command_composition(
     # Mock graph info output with host context nodes
     mock_graph_output = {
         "graph": {
-            "nodes": [
-                {
+            "nodes": {
+                "0": {
+                    "ref": "conanfile",
+                    "context": "host",
+                    "license": None,
+                    "dependencies": {
+                        "1": {
+                            "ref": "fmt/10.0.0",
+                            "direct": True,
+                        },
+                        "2": {
+                            "ref": "zlib/1.2.13",
+                            "direct": True,
+                        },
+                    },
+                },
+                "1": {
                     "ref": "fmt/10.0.0",
                     "context": "host",
                     "license": "MIT",
+                    "dependencies": {},
                 },
-                {
+                "2": {
                     "ref": "zlib/1.2.13",
                     "context": "host",
                     "license": "Zlib",
+                    "dependencies": {},
                 },
-            ]
+            },
+            "root": {
+                "0": "None"
+            },
+            "overrides": {},
+            "resolved_ranges": {},
+            "replaced_requires": {},
         }
     }
     mock_run_command.return_value = json.dumps(mock_graph_output)
@@ -73,13 +96,31 @@ async def test_check_licenses_with_profiles_and_remote(
     """Test check_licenses with profiles and remote - command composition."""
     mock_graph_output = {
         "graph": {
-            "nodes": [
-                {
+            "nodes": {
+                "0": {
+                    "ref": "conanfile",
+                    "context": "host",
+                    "license": None,
+                    "dependencies": {
+                        "1": {
+                            "ref": "boost/1.84.0",
+                            "direct": True,
+                        },
+                    },
+                },
+                "1": {
                     "ref": "boost/1.84.0",
                     "context": "host",
                     "license": "BSL-1.0",
-                }
-            ]
+                    "dependencies": {},
+                },
+            },
+            "root": {
+                "0": "None"
+            },
+            "overrides": {},
+            "resolved_ranges": {},
+            "replaced_requires": {},
         }
     }
     mock_run_command.return_value = json.dumps(mock_graph_output)
@@ -124,28 +165,53 @@ async def test_check_licenses_filters_host_context_only(
     # Mock graph output with both host and build context nodes
     mock_graph_output = {
         "graph": {
-            "nodes": [
-                {
+            "nodes": {
+                "0": {
+                    "ref": "conanfile",
+                    "context": "host",
+                    "license": None,
+                    "dependencies": {
+                        "1": {
+                            "ref": "fmt/10.0.0",
+                            "direct": True,
+                        },
+                        "2": {
+                            "ref": "zlib/1.2.13",
+                            "direct": True,
+                        },
+                    },
+                },
+                "1": {
                     "ref": "fmt/10.0.0",
                     "context": "host",
                     "license": "MIT",
+                    "dependencies": {},
                 },
-                {
+                "2": {
                     "ref": "cmake/3.28.0",
                     "context": "build",
                     "license": "BSD-3-Clause",
+                    "dependencies": {},
                 },
-                {
+                "3": {
                     "ref": "zlib/1.2.13",
                     "context": "host",
                     "license": "Zlib",
+                    "dependencies": {},
                 },
-                {
+                "4": {
                     "ref": "ninja/1.13.0",
                     "context": "build",
                     "license": "Apache-2.0",
+                    "dependencies": {},
                 },
-            ]
+            },
+            "root": {
+                "0": "None"
+            },
+            "overrides": {},
+            "resolved_ranges": {},
+            "replaced_requires": {},
         }
     }
     mock_run_command.return_value = json.dumps(mock_graph_output)
@@ -177,38 +243,81 @@ async def test_check_licenses_classifies_licenses_correctly(
     # Mock graph output with different license types
     mock_graph_output = {
         "graph": {
-            "nodes": [
-                {
+            "nodes": {
+                "0": {
+                    "ref": "conanfile",
+                    "context": "host",
+                    "license": None,
+                    "dependencies": {
+                        "1": {
+                            "ref": "fmt/10.0.0",
+                            "direct": True,
+                        },
+                        "2": {
+                            "ref": "openssl/3.2.0",
+                            "direct": True,
+                        },
+                        "3": {
+                            "ref": "gpl-library/1.0.0",
+                            "direct": True,
+                        },
+                        "4": {
+                            "ref": "agpl-library/2.0.0",
+                            "direct": True,
+                        },
+                        "5": {
+                            "ref": "unknown-library/1.0.0",
+                            "direct": True,
+                        },
+                        "6": {
+                            "ref": "no-license-library/1.0.0",
+                            "direct": True,
+                        },
+                    },
+                },
+                "1": {
                     "ref": "fmt/10.0.0",
                     "context": "host",
                     "license": "MIT",
+                    "dependencies": {},
                 },
-                {
+                "2": {
                     "ref": "openssl/3.2.0",
                     "context": "host",
                     "license": "Apache-2.0",
+                    "dependencies": {},
                 },
-                {
+                "3": {
                     "ref": "gpl-library/1.0.0",
                     "context": "host",
                     "license": "GPL-3.0",
+                    "dependencies": {},
                 },
-                {
+                "4": {
                     "ref": "agpl-library/2.0.0",
                     "context": "host",
                     "license": "AGPL-3.0",
+                    "dependencies": {},
                 },
-                {
+                "5": {
                     "ref": "unknown-library/1.0.0",
                     "context": "host",
                     "license": "Custom-License",
+                    "dependencies": {},
                 },
-                {
+                "6": {
                     "ref": "no-license-library/1.0.0",
                     "context": "host",
                     "license": None,
+                    "dependencies": {},
                 },
-            ]
+            },
+            "root": {
+                "0": "None"
+            },
+            "overrides": {},
+            "resolved_ranges": {},
+            "replaced_requires": {},
         }
     }
     mock_run_command.return_value = json.dumps(mock_graph_output)
