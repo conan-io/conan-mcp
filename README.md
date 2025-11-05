@@ -144,7 +144,27 @@ Usage examples:
 - *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
+**`check_licenses`**
 
+Check license compliance for Conan package dependencies. This tool analyzes the dependency graph and identifies packages with licenses that may be incompatible with your specified policy (e.g., commercial use).
+
+Only packages in the "host" context are analyzed (build context packages are excluded as they are build-time tools and not included in the final product). The tool identifies:
+- Commercial-safe licenses (MIT, Apache-2.0, BSD, etc.)
+- Copyleft licenses (GPL, AGPL, LGPL, etc.) that may require derivative works to be open source
+- Unknown or unspecified licenses that require manual verification
+
+Parameters:
+- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`. This path is ALWAYS relative to `work_dir`.
+- `work_dir` (**required**): Working directory where the command should be executed. This is the base directory from which all paths are resolved.
+- `policy` (optional): License compliance policy (default: `"commercial-safe"`). Currently only `"commercial-safe"` is supported, which marks GPL, AGPL, LGPL and other copyleft licenses as incompatible with commercial use.
+- `remote` (optional): Name of the remote to search for dependencies. If omitted, all remotes are searched.
+- `build_profile` (optional): Profile to the build context.
+- `host_profile` (optional): Profile to the host context.
+
+Usage examples:
+- *"Check license compliance for dependencies in this project"*
+- *"Check if my project dependencies are commercial-safe"*
+- *"Verify license compliance for conanfile.py in ~/my_project using the windows profile"*
 
 
 
