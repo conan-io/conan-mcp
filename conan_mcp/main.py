@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
@@ -10,18 +11,22 @@ mcp = FastMCP("conan-mcp")
 
 def _get_conan_binary() -> str:
     """Get the Conan binary path from environment variable or default to 'conan'.
-    
+
     Returns:
         Path to conan binary. Defaults to 'conan' if CONAN_MCP_CONAN_PATH is not set.
     """
     return os.environ.get("CONAN_MCP_CONAN_PATH", "conan")
 
 
-async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
+async def run_command(
+    cmd: list[str], timeout: float = 30.0, cwd: str | None = None
+) -> str:
     """Execute a command and return the output.
 
     Args:
         cmd: List of command arguments (e.g., ["conan", "search", "boost"])
+        timeout: Timeout in seconds
+        cwd: Working directory where the command should be executed (optional)
 
     Returns:
         Command output as string
@@ -36,6 +41,7 @@ async def run_command(cmd: list[str], timeout: float = 30.0) -> str:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             stdin=asyncio.subprocess.DEVNULL,
+            cwd=cwd,
         )
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
 
@@ -266,13 +272,18 @@ async def list_conan_profiles() -> list[str]:
     some dependencies, it will error unless the 'build_missing' argument is used to build from source.
 
     Examples:
-        - install_conan_packages(path="C:/Users/username/project/conanfile.txt")
-        - install_conan_packages(path="~/folder/conanfile.py", remote="conancenter")
-        - install_conan_packages(path="/home/username/project/conanfile.py",
-                                settings_host="os=Windows,arch=armv8")
+        - install_conan_packages(work_dir="/home/user/project", path="conanfile.txt")
+        - install_conan_packages(work_dir="~/my_project", path="conanfile.py", remote="conancenter")
+        - install_conan_packages(work_dir="/home/user/project", path="conanfile.py",
+                                settings_host=["os=Windows", "arch=armv8"])
 
     Args:
-        path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py)
+        path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py).
+              This path is ALWAYS relative to work_dir. For example, if work_dir is "/home/user/project" 
+              and path is "conanfile.py", it will resolve to "/home/user/project/conanfile.py".
+        work_dir: Working directory where the command should be executed. 
+                 This is the base directory from which all paths are resolved.
+                 Always required. If the user mentions they are in a specific directory, use that.
         remote: Optional remote name to search in (searches all remotes if not specified)
         search_in_cache: Do not use remote, resolve exclusively in the cache.
         build_profile: Profile to the build context.
@@ -286,7 +297,7 @@ async def list_conan_profiles() -> list[str]:
             - "compiler=gcc": compiler,
             - "compiler.version=11": compiler version,
             - "compiler.runtime=libstdc++11": compiler runtime,
-            - "compiler.runtime_version=11": compiler runtime version'
+            - "compiler.runtime_version=11": compiler runtime version
         options_host: Substitute options from the default host profile (fPIC, shared, etc.)
             Omit to use the options of the default host profile.
             e.g. ["fPIC=True", "shared=False"]
@@ -313,6 +324,9 @@ async def list_conan_profiles() -> list[str]:
 async def install_conan_packages(
     path: str = Field(
         description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
+    ),
+    work_dir: str = Field(
+        description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
     ),
     remote: str = Field(
         default=None, description="Remote name. Omit  to search in all remotes."
@@ -346,7 +360,14 @@ async def install_conan_packages(
         description="Build all the missing binary dependencies when they are not available in the cache or in the remotes for download.",
     ),
 ) -> dict:
-    cmd = ["conan", "install", path]
+    # Expand ~ in work_dir and ensure it exists
+    base_work_dir = Path(work_dir).expanduser()
+    base_work_dir.mkdir(parents=True, exist_ok=True)
+
+    # Path is always relative to work_dir
+    actual_path = str(base_work_dir / path)
+
+    cmd = [_get_conan_binary(), "install", actual_path]
 
     if remote and not search_in_cache:
         cmd.extend(["--remote", remote])
@@ -375,7 +396,8 @@ async def install_conan_packages(
 
     cmd.extend(["--format=json"])
 
-    raw_output = await run_command(cmd, timeout=timeout)
+    # Convert Path to string only when passing to run_command
+    raw_output = await run_command(cmd, timeout=timeout, cwd=str(base_work_dir))
     return json.loads(raw_output)
 
 
@@ -418,7 +440,9 @@ async def install_conan_packages(
                       - ['cmake/4.1.2'] - CMake build tool
                       - ['ninja/1.13.1'] - Ninja build system
                       - ['meson/1.9.1'] - Meson build system
-        output_dir: Output directory for the project (default: current directory)
+        work_dir: Working directory where the command should be executed. 
+                 The project will be created directly in this directory.
+                 Always required.
         force: Overwrite existing files if they exist (default: False)
     
     Returns:
@@ -441,14 +465,18 @@ async def create_conan_project(
         default=None,
         description="List of tool dependencies with versions. Common examples: ['cmake/4.1.2'], ['ninja/1.13.1'], ['meson/1.9.1']",
     ),
-    output_dir: str = Field(
-        default=".", description="Output directory for the project"
+    work_dir: str = Field(
+        description="Working directory where the command should be executed. The project will be created directly in this directory. Always required."
     ),
     force: bool = Field(
         default=False, description="Overwrite existing files if they exist"
     ),
 ) -> dict:
     """Create a new Conan project with specified dependencies."""
+
+    # Expand ~ in work_dir and ensure it exists
+    base_work_dir = Path(work_dir).expanduser()
+    base_work_dir.mkdir(parents=True, exist_ok=True)
 
     # Build the conan new command
     cmd = [_get_conan_binary(), "new", template]
@@ -469,15 +497,11 @@ async def create_conan_project(
             if dep.strip():  # Skip empty strings
                 cmd.extend(["--define", f"tool_requires={dep.strip()}"])
 
-    # Add output directory
-    if output_dir != ".":
-        cmd.extend(["--output", output_dir])
-
     # Add force flag if requested
     if force:
         cmd.append("--force")
 
-    output = await run_command(cmd)
+    output = await run_command(cmd, cwd=str(base_work_dir))
 
     deps_note = (
         f" (WARNING: Review and update the generated code to use these dependencies: {', '.join(requires)} - check includes, source code usage, and build system targets)"

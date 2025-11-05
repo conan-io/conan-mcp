@@ -51,7 +51,7 @@ async def test_conan_new_with_dependencies(
             "version": "2.0",
             "requires": ["fmt/12.0.0", "openssl/3.6.0"],
             "tool_requires": ["cmake/3.28.0", "ninja/1.11.1"],
-            "output_dir": "/tmp/test",
+            "work_dir": "/tmp",
             "force": True,
         },
     )
@@ -69,8 +69,9 @@ async def test_conan_new_with_dependencies(
     assert "requires=openssl/3.6.0" in call_args
     assert "tool_requires=cmake/3.28.0" in call_args
     assert "tool_requires=ninja/1.11.1" in call_args
-    assert "--output" in call_args
-    assert "/tmp/test" in call_args
+    assert (
+        "--output" not in call_args
+    )  # No output_dir anymore, project created directly in work_dir
     assert "--force" in call_args
 
     # Verify output is included in result and warning includes only requires (not tool_requires)
@@ -94,7 +95,7 @@ async def test_conan_new_empty_dependencies(
 
     result = await client_session.call_tool(
         "create_conan_project",
-        {"template": "header_lib", "name": "mylib", "requires": []},
+        {"template": "header_lib", "name": "mylib", "requires": [], "work_dir": "/tmp"},
     )
 
     assert isinstance(result, CallToolResult)
@@ -120,12 +121,17 @@ async def test_conan_new_empty_dependencies(
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
-async def test_create_project_uses_custom_conan_binary(mock_run_command, client_session: ClientSession, mock_conan_output):
+async def test_create_project_uses_custom_conan_binary(
+    mock_run_command, client_session: ClientSession, mock_conan_output
+):
     """Test that create_conan_project uses CONAN_MCP_CONAN_PATH if set."""
     mock_run_command.return_value = mock_conan_output
     custom_path = "/custom/path/conan"
-    
+
     with patch.dict(os.environ, {"CONAN_MCP_CONAN_PATH": custom_path}, clear=False):
-        await client_session.call_tool("create_conan_project", {"template": "cmake_lib", "name": "test"})
+        await client_session.call_tool(
+            "create_conan_project",
+            {"template": "cmake_lib", "name": "test", "work_dir": "/tmp"},
+        )
         call_args = mock_run_command.call_args[0][0]
         assert call_args[0] == custom_path

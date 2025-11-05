@@ -118,11 +118,13 @@ async def test_list_conan_profiles(mock_run_command, client_session: ClientSessi
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
-async def test_profile_tools_use_custom_conan_binary(mock_run_command, client_session: ClientSession):
+async def test_profile_tools_use_custom_conan_binary(
+    mock_run_command, client_session: ClientSession
+):
     """Test that profile tools use CONAN_MCP_CONAN_PATH if set."""
     mock_run_command.return_value = '{"local": ["default"]}'
     custom_path = "/custom/path/conan"
-    
+
     with patch.dict(os.environ, {"CONAN_MCP_CONAN_PATH": custom_path}, clear=False):
         await client_session.call_tool("get_conan_profile", {})
         call_args = mock_run_command.call_args[0][0]
