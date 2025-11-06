@@ -22,14 +22,14 @@ async def client_session() -> ClientSession:
 
 @pytest.mark.anyio
 @patch("conan_mcp.main.run_command")
-async def test_audit_conan_scan(
+async def test_scan_conan_dependencies(
     mock_run_command, client_session: ClientSession
 ):
     """Test basic conan audit scan command composition."""
     mock_run_command.return_value = '{"result": "success"}'
 
     await client_session.call_tool(
-        "audit_conan_scan", {"path": "/path/to/conanfile.txt", "work_dir": "/path/to/project"}
+        "scan_conan_dependencies", {"path": "/path/to/conanfile.txt", "work_dir": "/path/to/project"}
     )
 
     # Verify the command was composed correctly
