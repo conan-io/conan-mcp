@@ -513,94 +513,14 @@ async def create_conan_project(
     }
 
 
-# License compatibility definitions
-COMMERCIAL_SAFE_LICENSES = {
-    "MIT",
-    "Apache-2.0",
-    "Apache 2.0",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
-    "BSD-4-Clause",
-    "BSD",
-    "ISC",
-    "MPL-2.0",
-    "MPL 2.0",
-    "Unlicense",
-    "Public Domain",
-    "Zlib",
-    "Boost-1.0",
-    "Boost 1.0",
-    "0BSD",
-    "CC0-1.0",
-    "CC0 1.0",
-}
-
-COMMERCIAL_UNSAFE_LICENSES = {
-    "GPL-2.0",
-    "GPL-2.0-only",
-    "GPL-2.0-or-later",
-    "GPL-3.0",
-    "GPL-3.0-only",
-    "GPL-3.0-or-later",
-    "GPL",
-    "AGPL-1.0",
-    "AGPL-3.0",
-    "AGPL-3.0-only",
-    "AGPL-3.0-or-later",
-    "AGPL",
-    "LGPL-2.0",
-    "LGPL-2.1",
-    "LGPL-3.0",
-    "LGPL",
-    "CPOL-1.02",
-    "CPOL",
-    "Sleepycat",
-    "QPL",
-    "NPL",
-    "OSL-3.0",
-}
-
-
-def _is_license_commercial_safe(license_str: str) -> tuple[str, str]:
-    """Check if a license is safe for commercial use.
-
-    Args:
-        license_str: License string (may contain multiple licenses separated by commas, etc.)
-
-    Returns:
-        Tuple of (status, reason) where status is one of: SAFE, UNSAFE, UNKNOWN, INVALID
-    """
-    if not license_str:
-        return "INVALID", "No license specified"
-
-    # Normalize license string: uppercase, strip whitespace
-    license_normalized = license_str.upper().strip()
-
-    # Check for explicitly unsafe licenses (case-insensitive)
-    for unsafe in COMMERCIAL_UNSAFE_LICENSES:
-        if unsafe.upper() in license_normalized:
-            return "UNSAFE", f"License '{license_str}' contains copyleft license '{unsafe}' which requires derivative works to be open source"
-
-    # Check for explicitly safe licenses (case-insensitive)
-    for safe in COMMERCIAL_SAFE_LICENSES:
-        if safe.upper() in license_normalized:
-            return "SAFE", f"License '{license_str}' is permissive and safe for commercial use"
-
-    # If we have a license string but it doesn't match known licenses, warn
-    if license_normalized and license_normalized not in ["NONE", "UNKNOWN", ""]:
-        return "UNKNOWN", f"License '{license_str}' is not recognized as commercial-safe. Please verify manually."
-
-    return "INVALID", "No valid license found"
-
-
-def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
+def _extract_licenses_from_graph(graph_data: dict) -> dict[str, str | None]:
     """Extract license information from conan graph info JSON output.
 
     Args:
         graph_data: Parsed JSON from conan graph info
 
     Returns:
-        Dictionary mapping package references to license info
+        Dictionary mapping package references to license strings (or None if not specified)
     """
     licenses_map = {}
 
@@ -614,7 +534,6 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
 
         recipe = node_data.get("recipe")
         # Skip the root conanfile node (not a dependency)
-        # TODO: Check the root conanfile license compatibility with the policy and the dependencies licenses
         if recipe == "Consumer":
             continue
 
@@ -623,41 +542,32 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
 
         # Handle license as string, list, or dict
         if isinstance(license_info, list):
-            # Join multiple licenses with " OR " or ", " depending on context
-            license_str = " OR ".join(str(l) for l in license_info if l)
+            # Join multiple licenses with " OR "
+            license_str = " OR ".join(str(l) for l in license_info if l) if license_info else None
         elif license_info:
             license_str = str(license_info)
         else:
             license_str = None
 
         ref = node_data.get("ref")
-        licenses_map[ref] = {
-            "license": license_str,
-            "package": ref,
-        }
+        licenses_map[ref] = license_str
 
     return licenses_map
 
 
 @mcp.tool(
     description="""
-    Check license compliance for Conan package dependencies.
+    Collect license information for Conan package dependencies.
 
     This tool uses `conan graph info` to extract license information from the dependency
-    graph and marks packages with licenses incompatible with commercial use based on the
-    specified policy.
+    graph for all packages.
 
     Only packages in the "host" context are analyzed (build context packages are excluded
     as they are build-time tools and not included in the final product).
 
-    The tool analyzes all host context dependencies in the graph and identifies packages with:
-    - Commercial-safe licenses (MIT, Apache-2.0, BSD, etc.)
-    - Copyleft licenses (GPL, AGPL, LGPL, etc.) that may require derivative works to be open source
-    - Unknown or unspecified licenses that require manual verification
-
     Examples:
-        - check_licenses(work_dir="/home/user/project", path="conanfile.py", policy="commercial-safe")
-        - check_licenses(work_dir="~/my_project", path="conanfile.txt")
+        - check_conan_dependencies_licenses(work_dir="/home/user/project", path="conanfile.py")
+        - check_conan_dependencies_licenses(work_dir="~/my_project", path="conanfile.txt")
 
     Args:
         path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py).
@@ -665,33 +575,21 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, dict]:
         work_dir: Working directory where the command should be executed.
                  This is the base directory from which all paths are resolved.
                  Always required.
-        policy: License compliance policy (default: "commercial-safe").
-                Currently only "commercial-safe" is supported, which marks GPL, AGPL, LGPL
-                and other copyleft licenses as incompatible with commercial use.
         remote: Optional remote name to search in (searches all remotes if not specified)
         build_profile: Profile to the build context.
         host_profile: Profile to the host context.
 
     Returns:
-        Dictionary containing:
-        - total_packages: Total number of packages in the dependency graph
-        - compliant_packages: List of packages with commercial-safe licenses
-        - non_compliant_packages: List of packages with non-compliant licenses
-        - unknown_licenses: List of packages with unknown or unspecified licenses
-        - summary: Summary of compliance status
-        - details: Detailed information for each package including license and compliance status
+        Dictionary mapping package references to their license strings.
+        Package references are keys, license strings (or None if not specified) are values.
     """
 )
-async def check_licenses(
+async def check_conan_dependencies_licenses(
     path: str = Field(
         description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
     ),
     work_dir: str = Field(
         description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
-    ),
-    policy: str = Field(
-        default="commercial-safe",
-        description="License compliance policy. Currently only 'commercial-safe' is supported.",
     ),
     remote: str = Field(
         default=None, description="Remote name. Omit to search in all remotes."
@@ -705,10 +603,7 @@ async def check_licenses(
         description="Profile to the host context.",
     ),
 ) -> dict:
-    """Check license compliance for Conan package dependencies."""
-
-    if policy != "commercial-safe":
-        raise ValueError(f"Unsupported policy: {policy}. Only 'commercial-safe' is currently supported.")
+    """Collect license information for Conan package dependencies."""
 
     # Expand ~ in work_dir and ensure it exists
     base_work_dir = Path(work_dir).expanduser()
@@ -736,50 +631,7 @@ async def check_licenses(
     # Extract licenses from graph
     licenses_map = _extract_licenses_from_graph(graph_data)
 
-    # Analyze licenses
-    compliant_packages = []
-    non_compliant_packages = []
-    unknown_licenses = []
-    details = []
-
-    for package_ref, info in licenses_map.items():
-        license_str = info.get("license")
-        status, reason = _is_license_commercial_safe(license_str)
-
-        package_detail = {
-            "package": package_ref,
-            "license": license_str or "Not specified",
-            "compliant": status == "SAFE",
-            "reason": reason,
-        }
-        details.append(package_detail)
-
-        if status == "SAFE":
-            compliant_packages.append(package_ref)
-        elif status == "UNKNOWN" or status == "INVALID":
-            unknown_licenses.append(package_ref)
-        else:
-            non_compliant_packages.append(package_ref)
-
-    total_packages = len(licenses_map)
-    all_compliant = len(non_compliant_packages) == 0 and len(unknown_licenses) == 0
-
-    summary = (
-        f"License compliance check completed: {len(compliant_packages)}/{total_packages} packages compliant"
-        if all_compliant
-        else f"License compliance check completed: {len(compliant_packages)} compliant, {len(non_compliant_packages)} non-compliant, {len(unknown_licenses)} unknown licenses"
-    )
-
-    return {
-        "total_packages": total_packages,
-        "compliant_packages": compliant_packages,
-        "non_compliant_packages": non_compliant_packages,
-        "unknown_licenses": unknown_licenses,
-        "summary": summary,
-        "details": details,
-        "policy": policy,
-        "all_compliant": all_compliant,
-    }
+    return licenses_map
 
 
 def main():
