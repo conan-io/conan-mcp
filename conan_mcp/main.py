@@ -518,24 +518,38 @@ async def create_conan_project(
 
     Requires provider authentication. If you dont have any yet you can get a token by signing up for a free at https://audit.conan.io/register
 
-    Audit a Conan project for security vulnerabilities.
+    Audit a Conan project or a specific package for security vulnerabilities.
     There is a limit of 100 API calls per day. If the limit is reached, the tool will return an error.
+    Use path to scan the complete graph of dependencies. Use reference to audit a specific package.
+    Do not use both path and reference at the same time.
+    
     Args:
         work_dir: Working directory where the command should be executed. Always required.
         path: This path is ALWAYS relative to work_dir. For example, if work_dir is "/home/user/project" and path is "conanfile.txt", it will resolve to "/home/user/project/conanfile.txt".
+        reference: Conan reference to audit. For example, "fmt/12.0.0". Use it in case the user provides a specific reference to audit. Use it instead of path.
     Returns:
         Dictionary containing the result of the audit scan.
     """
 )
 async def scan_conan_dependencies(
     work_dir: str = Field(description="Working directory where the command should be executed. Always required."),
-    path: str = Field(description="Path to the folder relative to working directory containing the recipe of the project or to a recipe file conanfile.txt/.py"),
+    path: str = Field(default=None, description="Path to the folder relative to working directory containing the recipe of the project or to a recipe file conanfile.txt/.py"),
+    reference: str = Field(default=None, description="Conan reference to audit. For example, 'fmt/12.0.0'."),
 ) -> dict:
-    base_work_dir = Path(work_dir).expanduser()
-    actual_path = str(base_work_dir / path)
-    cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format", "json"]
-    raw_output = await run_command(cmd, cwd=str(Path(work_dir)))
-    return json.loads(raw_output)
+    if path and reference:
+        raise RuntimeError("Do not use both path and reference at the same time.")
+    if path:
+        base_work_dir = Path(work_dir).expanduser()
+        actual_path = str(base_work_dir / path)
+        cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format", "json"]
+        raw_output = await run_command(cmd, cwd=str(Path(work_dir)))
+        return json.loads(raw_output)
+    elif reference:
+        cmd = [_get_conan_binary(), "audit", "list", reference, "--format", "json"]
+        raw_output = await run_command(cmd, cwd=str(Path(work_dir)))
+        return json.loads(raw_output)
+    
+    raise RuntimeError("Either path or reference must be provided.")
 
 
 def main():

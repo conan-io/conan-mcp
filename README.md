@@ -153,6 +153,7 @@ Parameters:
 
 Usage examples:
 - *"Scan dependencies in this project for known vulnerabilities"*
+- *"Scan the latest version of zlib for vulnerabilities"*
 
 
 ## Local Development
