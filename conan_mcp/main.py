@@ -570,11 +570,11 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, str | None]:
         - check_conan_dependencies_licenses(work_dir="~/my_project", path="conanfile.txt")
 
     Args:
+        work_dir: Working directory where the command should be executed.
+                  This is the base directory from which all paths are resolved.
+                  Always required.
         path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py).
               This path is ALWAYS relative to work_dir.
-        work_dir: Working directory where the command should be executed.
-                 This is the base directory from which all paths are resolved.
-                 Always required.
         remote: Optional remote name to search in (searches all remotes if not specified)
         build_profile: Profile to the build context.
         host_profile: Profile to the host context.
@@ -585,11 +585,11 @@ def _extract_licenses_from_graph(graph_data: dict) -> dict[str, str | None]:
     """
 )
 async def check_conan_dependencies_licenses(
-    path: str = Field(
-        description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
-    ),
     work_dir: str = Field(
         description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
+    ),
+    path: str = Field(
+        description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py"
     ),
     remote: str = Field(
         default=None, description="Remote name. Omit to search in all remotes."

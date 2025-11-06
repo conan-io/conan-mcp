@@ -151,8 +151,8 @@ Collect license information for Conan package dependencies. This tool uses `cona
 Only packages in the "host" context are analyzed (build context packages are excluded as they are build-time tools and not included in the final product).
 
 Parameters:
-- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`. This path is ALWAYS relative to `work_dir`.
 - `work_dir` (**required**): Working directory where the command should be executed. This is the base directory from which all paths are resolved.
+- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`. This path is ALWAYS relative to `work_dir`.
 - `remote` (optional): Name of the remote to search for dependencies. If omitted, all remotes are searched.
 - `build_profile` (optional): Profile to the build context.
 - `host_profile` (optional): Profile to the host context.
