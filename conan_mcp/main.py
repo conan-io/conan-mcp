@@ -542,7 +542,7 @@ async def scan_conan_dependencies(
         base_work_dir = Path(work_dir).expanduser()
         actual_path = str(base_work_dir / path)
         cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format", "json"]
-        raw_output = await run_command(cmd, cwd=str(Path(work_dir)))
+        raw_output = await run_command(cmd, cwd=base_work_dir)
         return json.loads(raw_output)
     elif reference:
         cmd = [_get_conan_binary(), "audit", "list", reference, "--format", "json"]
