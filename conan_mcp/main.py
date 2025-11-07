@@ -571,10 +571,10 @@ def _extract_licenses_from_graph(graph_data: dict) -> list[dict[str, str | list[
     At least one of these must be provided.
 
     Examples:
-        - get_conan_packages_licenses(work_dir="/home/user/project", path="conanfile.py")
-        - get_conan_packages_licenses(work_dir="~/my_project", path="conanfile.txt")
-        - get_conan_packages_licenses(work_dir="/tmp", requires=["zlib/1.2.11"])
-        - get_conan_packages_licenses(work_dir="/tmp", requires=["zlib/1.2.11", "fmt/10.0.0"])
+        - get_conan_licenses(work_dir="/home/user/project", path="conanfile.py")
+        - get_conan_licenses(work_dir="~/my_project", path="conanfile.txt")
+        - get_conan_licenses(work_dir="/tmp", requires=["zlib/1.2.11"])
+        - get_conan_licenses(work_dir="/tmp", requires=["zlib/1.2.11", "fmt/10.0.0"])
 
     Args:
         work_dir: Working directory where the command should be executed.
@@ -595,7 +595,7 @@ def _extract_licenses_from_graph(graph_data: dict) -> list[dict[str, str | list[
         - "licenses": List of license strings (always a list, empty if no license specified)
     """
 )
-async def get_conan_packages_licenses(
+async def get_conan_licenses(
     work_dir: str = Field(
         description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
     ),

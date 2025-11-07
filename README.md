@@ -144,7 +144,7 @@ Usage examples:
 - *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
-**`get_conan_packages_licenses`**
+**`get_conan_licenses`**
 
 Collect license information for Conan package dependencies. This tool uses `conan graph info` to extract license information from the dependency graph for all packages.
 

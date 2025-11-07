@@ -29,7 +29,7 @@ async def client_session() -> AsyncGenerator[ClientSession]:
 async def test_check_licenses_basic_command_composition(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test basic get_conan_packages_licenses functionality - verify command composition."""
+    """Test basic get_conan_licenses functionality - verify command composition."""
     # Mock graph info output with host context nodes
     mock_graph_output = {
         "graph": {
@@ -77,7 +77,7 @@ async def test_check_licenses_basic_command_composition(
     mock_is_dir.return_value = True
 
     await client_session.call_tool(
-        "get_conan_packages_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
+        "get_conan_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
     )
 
     # Verify the command was composed correctly
@@ -97,7 +97,7 @@ async def test_check_licenses_basic_command_composition(
 async def test_check_licenses_with_profiles_and_remote(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test get_conan_packages_licenses with profiles and remote - command composition."""
+    """Test get_conan_licenses with profiles and remote - command composition."""
     mock_graph_output = {
         "graph": {
             "nodes": {
@@ -133,7 +133,7 @@ async def test_check_licenses_with_profiles_and_remote(
     mock_is_dir.return_value = True
 
     await client_session.call_tool(
-        "get_conan_packages_licenses",
+        "get_conan_licenses",
         {
             "path": "conanfile.py",
             "work_dir": "/home/user/project",
@@ -165,7 +165,7 @@ async def test_check_licenses_with_profiles_and_remote(
 async def test_check_licenses_filters_host_context_only(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test that get_conan_packages_licenses only processes host context nodes, ignoring build context."""
+    """Test that get_conan_licenses only processes host context nodes, ignoring build context."""
     # Mock graph output with both host and build context nodes
     mock_graph_output = {
         "graph": {
@@ -227,7 +227,7 @@ async def test_check_licenses_filters_host_context_only(
     mock_is_dir.return_value = True
 
     result = await client_session.call_tool(
-        "get_conan_packages_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
+        "get_conan_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
     )
 
     # Verify only host context packages are included
@@ -261,7 +261,7 @@ async def test_check_licenses_filters_host_context_only(
 async def test_check_licenses_collects_licenses_correctly(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test that get_conan_packages_licenses correctly collects all licenses from packages."""
+    """Test that get_conan_licenses correctly collects all licenses from packages."""
     # Mock graph output with different license types
     mock_graph_output = {
         "graph": {
@@ -353,7 +353,7 @@ async def test_check_licenses_collects_licenses_correctly(
     mock_is_dir.return_value = True
 
     result = await client_session.call_tool(
-        "get_conan_packages_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
+        "get_conan_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
     )
 
     # FastMCP may serialize list items separately, so we need to collect all content items
@@ -386,7 +386,7 @@ async def test_check_licenses_collects_licenses_correctly(
 async def test_check_licenses_handles_multiple_licenses(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test that get_conan_packages_licenses correctly handles packages with multiple licenses (list format)."""
+    """Test that get_conan_licenses correctly handles packages with multiple licenses (list format)."""
     # Mock graph output with a package that has multiple licenses
     mock_graph_output = {
         "graph": {
@@ -423,7 +423,7 @@ async def test_check_licenses_handles_multiple_licenses(
     mock_is_dir.return_value = True
 
     result = await client_session.call_tool(
-        "get_conan_packages_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
+        "get_conan_licenses", {"path": "conanfile.txt", "work_dir": "/path/to"}
     )
 
     # FastMCP may serialize list items separately, so we need to collect all content items
@@ -447,7 +447,7 @@ async def test_check_licenses_handles_multiple_licenses(
 async def test_check_licenses_with_requires_single_reference(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test that get_conan_packages_licenses works with requires parameter (single reference)."""
+    """Test that get_conan_licenses works with requires parameter (single reference)."""
     # Mock graph output with a single package reference
     mock_graph_output = {
         "graph": {
@@ -484,7 +484,7 @@ async def test_check_licenses_with_requires_single_reference(
     mock_is_dir.return_value = True
 
     result = await client_session.call_tool(
-        "get_conan_packages_licenses",
+        "get_conan_licenses",
         {"requires": ["zlib/1.2.11"], "work_dir": "/tmp"}
     )
 
@@ -515,7 +515,7 @@ async def test_check_licenses_with_requires_single_reference(
 async def test_check_licenses_with_requires_multiple_references(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test that get_conan_packages_licenses works with requires parameter (multiple references)."""
+    """Test that get_conan_licenses works with requires parameter (multiple references)."""
     # Mock graph output with multiple package references
     mock_graph_output = {
         "graph": {
@@ -574,7 +574,7 @@ async def test_check_licenses_with_requires_multiple_references(
     mock_is_dir.return_value = True
 
     result = await client_session.call_tool(
-        "get_conan_packages_licenses",
+        "get_conan_licenses",
         {
             "requires": ["zlib/1.2.11", "fmt/10.0.0", "openssl/3.2.0"],
             "work_dir": "/tmp"
@@ -624,7 +624,7 @@ async def test_check_licenses_with_requires_multiple_references(
 async def test_check_licenses_with_requires_and_profiles(
     mock_is_dir, mock_run_command, client_session: ClientSession
 ):
-    """Test that get_conan_packages_licenses works with requires and profiles."""
+    """Test that get_conan_licenses works with requires and profiles."""
     mock_graph_output = {
         "graph": {
             "nodes": {
@@ -660,7 +660,7 @@ async def test_check_licenses_with_requires_and_profiles(
     mock_is_dir.return_value = True
 
     result = await client_session.call_tool(
-        "get_conan_packages_licenses",
+        "get_conan_licenses",
         {
             "requires": ["boost/1.84.0"],
             "work_dir": "/tmp",
