@@ -62,12 +62,12 @@ async def test_conan_new_with_dependencies(
 
     # Verify all expected arguments are present
     assert "conan" in call_args and "new" in call_args and "cmake_lib" in call_args
-    assert '--define="name=mylib"' in call_args
-    assert '--define="version=2.0"' in call_args
-    assert '--define="requires=fmt/12.0.0"' in call_args
-    assert '--define="requires=openssl/3.6.0"' in call_args
-    assert '--define="tool_requires=cmake/3.28.0"' in call_args
-    assert '--define="tool_requires=ninja/1.11.1"' in call_args
+    assert "--define=name=mylib" in call_args
+    assert "--define=version=2.0" in call_args
+    assert "--define=requires=fmt/12.0.0" in call_args
+    assert "--define=requires=openssl/3.6.0" in call_args
+    assert "--define=tool_requires=cmake/3.28.0" in call_args
+    assert "--define=tool_requires=ninja/1.11.1" in call_args
     assert (
         "--output" not in call_args
     )  # No output_dir anymore, project created directly in work_dir
@@ -103,8 +103,8 @@ async def test_conan_new_empty_dependencies(
 
     # Verify only essential arguments are present
     assert "conan" in call_args and "new" in call_args and "header_lib" in call_args
-    assert '--define="name=mylib"' in call_args
-    assert '--define="version=0.1"' in call_args  # Default version is 0.1, not 1.0
+    assert "--define=name=mylib" in call_args
+    assert "--define=version=0.1" in call_args  # Default version is 0.1, not 1.0
 
     # Verify unnecessary arguments are NOT present
     assert not any('requires=' in arg for arg in call_args)  # No requires
