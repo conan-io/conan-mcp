@@ -518,7 +518,7 @@ async def create_conan_project(
 
     Requires provider authentication. If you dont have any yet you can get a token by signing up for a free at https://audit.conan.io/register
 
-    Audit a Conan project or a specific package for security vulnerabilities.
+    Audit a Conan project or a specific package for security vulnerabilities using the audit.conan.io service.
     There is a limit of 100 API calls per day. If the limit is reached, the tool will return an error.
     Use path to scan the complete graph of dependencies. Use reference to audit a specific package.
     Do not use both path and reference at the same time.
