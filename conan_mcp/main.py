@@ -512,6 +512,7 @@ async def create_conan_project(
         "result": f"Project '{name}' created successfully with template '{template}'{deps_note}\n\nOutput:\n{output}"
     }
 
+
 @mcp.tool(
     description="""
     ⚠️ WARNING: This tool makes an API call to audit.conan.io service. Only use when explicitly requested by the user.
@@ -528,30 +529,38 @@ async def create_conan_project(
     
     Args:
         work_dir: Working directory where the command should be executed. Always required.
-        path: This path is ALWAYS relative to work_dir. For example, if work_dir is "/home/user/project" and path is "conanfile.txt", it will resolve to "/home/user/project/conanfile.txt".
-        reference: Conan reference to audit. For example, "fmt/12.0.0". Use it in case the user provides a specific reference to audit. Use it instead of path.
+        path: This path is ALWAYS relative to work_dir. For example, if work_dir is "/home/user/project" and path is "conanfile.txt", it will resolve to "/home/user/project/conanfile.txt". When using path, all transitive dependencies will be scanned for vulnerabilities.
+
+        reference: Conan reference to audit. For example, "fmt/12.0.0". Use it in case the user provides a specific reference to audit. Use it instead of path. When using reference, only the vulnerabilities of that specific package reference will be scanned, but NOT its dependencies.
     Returns:
         Dictionary containing the result of the audit scan.
     """
 )
 async def scan_conan_dependencies(
-    work_dir: str = Field(description="Working directory where the command should be executed. Always required."),
-    path: str = Field(default=None, description="Path to the folder relative to working directory containing the recipe of the project or to a recipe file conanfile.txt/.py"),
-    reference: str = Field(default=None, description="Conan reference to audit. For example, 'fmt/12.0.0'."),
+    work_dir: str = Field(
+        description="Working directory where the command should be executed. Always required."
+    ),
+    path: str = Field(
+        default=None,
+        description="Path to the folder relative to working directory containing the recipe of the project or to a recipe file conanfile.txt/.py",
+    ),
+    reference: str = Field(
+        default=None, description="Conan reference to audit. For example, 'fmt/12.0.0'."
+    ),
 ) -> dict:
     if path and reference:
         raise RuntimeError("Do not use both path and reference at the same time.")
     if path:
         base_work_dir = Path(work_dir).expanduser()
         actual_path = str(base_work_dir / path)
-        cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format", "json"]
+        cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format=json"]
         raw_output = await run_command(cmd, cwd=base_work_dir)
         return json.loads(raw_output)
     elif reference:
-        cmd = [_get_conan_binary(), "audit", "list", reference, "--format", "json"]
+        cmd = [_get_conan_binary(), "audit", "list", reference, "--format=json"]
         raw_output = await run_command(cmd)
         return json.loads(raw_output)
-    
+
     raise RuntimeError("Either path or reference must be provided.")
 
 
