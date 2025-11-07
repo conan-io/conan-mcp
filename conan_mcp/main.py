@@ -546,7 +546,7 @@ async def scan_conan_dependencies(
         return json.loads(raw_output)
     elif reference:
         cmd = [_get_conan_binary(), "audit", "list", reference, "--format", "json"]
-        raw_output = await run_command(cmd, cwd=str(Path(work_dir)))
+        raw_output = await run_command(cmd)
         return json.loads(raw_output)
     
     raise RuntimeError("Either path or reference must be provided.")
