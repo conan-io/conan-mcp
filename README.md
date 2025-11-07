@@ -144,7 +144,7 @@ Usage examples:
 - *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
-**`audit_conan_scan`**
+**`scan_conan_dependencies`**
 
 Scan Conan packages and dependencies for security vulnerabilities
 
