@@ -144,8 +144,20 @@ Usage examples:
 - *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
+**`scan_conan_dependencies`**
 
+Scan Conan packages and dependencies for security vulnerabilities
 
+Parameters:
+- `work_dir` (**required**): Working directory where the command should be executed. This is the base directory from which all paths are resolved.
+- `path` (optional): Path to the folder containing the recipe or to a `conanfile.txt`/`conanfile.py`. This path is ALWAYS relative to `work_dir`.
+- `reference` (optional): Conan reference of a specific package to audit, e.g. `"fmt/12.0.0"`. Use this instead of `path` to audit only a specific package and not its dependencies.
+
+> **Note:** `path` and `reference` are mutually exclusive. Only one of them should be provided at a time.
+
+Usage examples:
+- *"Scan dependencies in this project for known vulnerabilities"*
+- *"Scan the latest version of zlib for vulnerabilities"*
 
 
 ## Local Development
