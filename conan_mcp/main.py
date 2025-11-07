@@ -191,15 +191,15 @@ async def list_conan_packages(
 
     cmd = [_get_conan_binary(), "list", pattern, "--format=json"]
     if remote:
-        cmd.extend(["--remote", remote])
+        cmd.append(f"--remote={remote}")
     if filter_settings:
         for fs in filter_settings:
-            cmd.extend(["-fs", fs])
+            cmd.append(f"-fs={fs}")
     if filter_options:
         for fo in filter_options:
-            cmd.extend(["-fo", fo])
+            cmd.append(f"-fo={fo}")
     if search_in_cache:
-        cmd.extend(["--cache"])
+        cmd.append("--cache")
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
@@ -239,7 +239,7 @@ async def get_conan_profile(
 ) -> dict:
     cmd = [_get_conan_binary(), "profile", "show", "--format=json"]
     if profile:
-        cmd.extend(["--profile", profile])
+        cmd.append(f"--profile={profile}")
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
@@ -370,31 +370,31 @@ async def install_conan_packages(
     cmd = [_get_conan_binary(), "install", actual_path]
 
     if remote and not search_in_cache:
-        cmd.extend(["--remote", remote])
+        cmd.append(f"--remote={remote}")
 
     if search_in_cache:
-        cmd.extend(["--no-remote"])
+        cmd.append("--no-remote")
 
     if build_profile:
-        cmd.extend(["-pr:b", build_profile])
+        cmd.append(f"-pr:b={build_profile}")
 
     if host_profile:
-        cmd.extend(["-pr:h", host_profile])
+        cmd.append(f"-pr:h={host_profile}")
 
     if settings_host:
         for sh in settings_host:
-            cmd.extend(["-s:h", sh])
+            cmd.append(f"-s:h={sh}")
     if options_host:
         for oh in options_host:
-            cmd.extend(["-o:h", oh])
+            cmd.append(f"-o:h={oh}")
 
     timeout = 90.0
 
     if build_missing:
-        cmd.extend(["--build=missing"])
+        cmd.append("--build=missing")
         timeout = 300.0
 
-    cmd.extend(["--format=json"])
+    cmd.append("--format=json")
 
     # Convert Path to string only when passing to run_command
     raw_output = await run_command(cmd, timeout=timeout, cwd=str(base_work_dir))
@@ -482,20 +482,20 @@ async def create_conan_project(
     cmd = [_get_conan_binary(), "new", template]
 
     # Add template arguments
-    cmd.extend(["--define", f"name={name}"])
-    cmd.extend(["--define", f"version={version}"])
+    cmd.append(f'--define="name={name}"')
+    cmd.append(f'--define="version={version}"')
 
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend(["--define", f"requires={dep.strip()}"])
+                cmd.append(f'--define="requires={dep.strip()}"')
 
     # Add tool dependencies if provided
     if tool_requires:
         for dep in tool_requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend(["--define", f"tool_requires={dep.strip()}"])
+                cmd.append(f'--define="tool_requires={dep.strip()}"')
 
     # Add force flag if requested
     if force:
@@ -661,6 +661,56 @@ async def get_conan_packages_licenses(
     licenses_list = _extract_licenses_from_graph(graph_data)
 
     return licenses_list
+
+@mcp.tool(
+    description="""
+    ⚠️ WARNING: This tool makes an API call to audit.conan.io service. Only use when explicitly requested by the user.
+
+    Requires provider authentication. If you dont have any yet you can get a token by signing up for a free at https://audit.conan.io/register
+
+    Audit a Conan project or a specific package for security vulnerabilities using the audit.conan.io service.
+    When using path: Scans the conanfile and all its transitive dependencies for vulnerabilities.
+    When using reference: Scans only the vulnerabilities of that specific package reference, but NOT its dependencies.
+
+    There is a limit of 100 API calls per day. If the limit is reached, the tool will return an error.
+    Use path to scan the complete graph of dependencies. Use reference to audit a specific package.
+    Do not use both path and reference at the same time.
+    
+    Args:
+        work_dir: Working directory where the command should be executed. Always required.
+        path: This path is ALWAYS relative to work_dir. For example, if work_dir is "/home/user/project" and path is "conanfile.txt", it will resolve to "/home/user/project/conanfile.txt". When using path, all transitive dependencies will be scanned for vulnerabilities.
+
+        reference: Conan reference to audit. For example, "fmt/12.0.0". Use it in case the user provides a specific reference to audit. Use it instead of path. When using reference, only the vulnerabilities of that specific package reference will be scanned, but NOT its dependencies.
+    Returns:
+        Dictionary containing the result of the audit scan.
+    """
+)
+async def scan_conan_dependencies(
+    work_dir: str = Field(
+        description="Working directory where the command should be executed. Always required."
+    ),
+    path: str = Field(
+        default=None,
+        description="Path to the folder relative to working directory containing the recipe of the project or to a recipe file conanfile.txt/.py",
+    ),
+    reference: str = Field(
+        default=None, description="Conan reference to audit. For example, 'fmt/12.0.0'."
+    ),
+) -> dict:
+    if path and reference:
+        raise RuntimeError("Do not use both path and reference at the same time.")
+    if path:
+        base_work_dir = Path(work_dir).expanduser()
+        actual_path = str(base_work_dir / path)
+        cmd = [_get_conan_binary(), "audit", "scan", actual_path, "--format=json"]
+        raw_output = await run_command(cmd, cwd=str(base_work_dir))
+        return json.loads(raw_output)
+    elif reference:
+        cmd = [_get_conan_binary(), "audit", "list", reference, "--format=json"]
+        raw_output = await run_command(cmd)
+        return json.loads(raw_output)
+
+    raise RuntimeError("Either path or reference must be provided.")
 
 
 def main():

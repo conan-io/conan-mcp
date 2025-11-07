@@ -34,7 +34,7 @@ async def test_list_conan_basic(mock_run_command, client_session: ClientSession)
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "list", "foo/1.2.11", "--format=json", "--remote", "*"]
+    expected_cmd = ["conan", "list", "foo/1.2.11", "--format=json", "--remote=*"]
     assert call_args == expected_cmd
 
 
@@ -51,7 +51,7 @@ async def test_list_conan_user_chanel(mock_run_command, client_session: ClientSe
 
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "list", "foo/1.2.11@*/*", "--format=json", "--remote", "*"]
+    expected_cmd = ["conan", "list", "foo/1.2.11@*/*", "--format=json", "--remote=*"]
     assert call_args == expected_cmd
 
 
@@ -83,8 +83,7 @@ async def test_list_conan_rrev_pid_prev(
         "list",
         f"foo/1.2.11#{rrev}:{pid}",
         "--format=json",
-        "--remote",
-        "*",
+        "--remote=*",
     ]
     assert call_args == expected_cmd
 
@@ -113,12 +112,9 @@ async def test_list_conan_filter_options(
         "list",
         "zlib/*:*#*",
         "--format=json",
-        "--remote",
-        "*",
-        "-fo",
-        "*:fPIC=True",
-        "-fo",
-        "*:shared=False",
+        "--remote=*",
+        "-fo=*:fPIC=True",
+        "-fo=*:shared=False",
     ]
     assert call_args == expected_cmd
 
@@ -143,12 +139,9 @@ async def test_list_conan_filter_settings(
         "list",
         "zlib/*:*",
         "--format=json",
-        "--remote",
-        "*",
-        "-fs",
-        "arch=armv8",
-        "-fs",
-        "os=Windows",
+        "--remote=*",
+        "-fs=arch=armv8",
+        "-fs=os=Windows",
     ]
     assert call_args == expected_cmd
 
@@ -172,8 +165,7 @@ async def test_list_conan_change_remote(
         "list",
         "zlib/*",
         "--format=json",
-        "--remote",
-        "conancenter",
+        "--remote=conancenter",
     ]
     assert call_args == expected_cmd
 
