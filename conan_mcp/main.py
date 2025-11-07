@@ -514,7 +514,7 @@ async def create_conan_project(
 
 @mcp.tool(
     description="""
-    ⚠️ WARNING: This tool makes an API call to the Conan API. Only use when explicitly requested by the user.
+    ⚠️ WARNING: This tool makes an API call to audit.conan.io service. Only use when explicitly requested by the user.
 
     Requires provider authentication. If you dont have any yet you can get a token by signing up for a free at https://audit.conan.io/register
 
