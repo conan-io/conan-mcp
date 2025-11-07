@@ -482,20 +482,20 @@ async def create_conan_project(
     cmd = [_get_conan_binary(), "new", template]
 
     # Add template arguments
-    cmd.append(f'--define="name={name}"')
-    cmd.append(f'--define="version={version}"')
+    cmd.append(f"--define=name={name}")
+    cmd.append(f"--define=version={version}")
 
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
-                cmd.append(f'--define="requires={dep.strip()}"')
+                cmd.append(f"--define=requires={dep.strip()}")
 
     # Add tool dependencies if provided
     if tool_requires:
         for dep in tool_requires:
             if dep.strip():  # Skip empty strings
-                cmd.append(f'--define="tool_requires={dep.strip()}"')
+                cmd.append(f"--define=tool_requires={dep.strip()}")
 
     # Add force flag if requested
     if force:
