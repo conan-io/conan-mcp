@@ -152,12 +152,9 @@ async def test_check_licenses_with_profiles_and_remote(
         "info",
         "--format=json",
         os.path.normpath("/home/user/project/conanfile.py"),
-        "--remote",
-        "conancenter",
-        "-pr:b",
-        "linux-debug",
-        "-pr:h",
-        "linux-release",
+        "--remote=conancenter",
+        "-pr:b=linux-debug",
+        "-pr:h=linux-release",
     ]
     assert call_args == expected_cmd
 
@@ -494,7 +491,7 @@ async def test_check_licenses_with_requires_single_reference(
     # Verify the command was composed correctly with --requires
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "graph", "info", "--format=json", "--requires", "zlib/1.2.11"]
+    expected_cmd = ["conan", "graph", "info", "--format=json", "--requires=zlib/1.2.11"]
     assert call_args == expected_cmd
 
     # Verify the result
@@ -592,12 +589,9 @@ async def test_check_licenses_with_requires_multiple_references(
         "graph",
         "info",
         "--format=json",
-        "--requires",
-        "zlib/1.2.11",
-        "--requires",
-        "fmt/10.0.0",
-        "--requires",
-        "openssl/3.2.0",
+        "--requires=zlib/1.2.11",
+        "--requires=fmt/10.0.0",
+        "--requires=openssl/3.2.0",
     ]
     assert call_args == expected_cmd
 
@@ -684,14 +678,10 @@ async def test_check_licenses_with_requires_and_profiles(
         "graph",
         "info",
         "--format=json",
-        "--requires",
-        "boost/1.84.0",
-        "--remote",
-        "conancenter",
-        "-pr:b",
-        "linux-debug",
-        "-pr:h",
-        "linux-release",
+        "--requires=boost/1.84.0",
+        "--remote=conancenter",
+        "-pr:b=linux-debug",
+        "-pr:h=linux-release",
     ]
     assert call_args == expected_cmd
 

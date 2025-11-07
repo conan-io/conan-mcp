@@ -642,16 +642,16 @@ async def get_conan_packages_licenses(
     elif requires:
         # Add each reference as a --requires flag
         for ref in requires:
-            cmd.extend(["--requires", ref])
+            cmd.append(f"--requires={ref}")
 
     if remote:
-        cmd.extend(["--remote", remote])
+        cmd.append(f"--remote={remote}")
 
     if build_profile:
-        cmd.extend(["-pr:b", build_profile])
+        cmd.append(f"-pr:b={build_profile}")
 
     if host_profile:
-        cmd.extend(["-pr:h", host_profile])
+        cmd.append(f"-pr:h={host_profile}")
 
     # Execute command with longer timeout since graph info can take time
     raw_output = await run_command(cmd, timeout=90.0, cwd=str(base_work_dir))
