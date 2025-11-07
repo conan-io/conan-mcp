@@ -191,15 +191,15 @@ async def list_conan_packages(
 
     cmd = [_get_conan_binary(), "list", pattern, "--format=json"]
     if remote:
-        cmd.extend([f"--remote={remote}"])
+        cmd.append(f"--remote={remote}")
     if filter_settings:
         for fs in filter_settings:
-            cmd.extend([f"-fs={fs}"])
+            cmd.append(f"-fs={fs}")
     if filter_options:
         for fo in filter_options:
-            cmd.extend([f"-fo={fo}"])
+            cmd.append(f"-fo={fo}")
     if search_in_cache:
-        cmd.extend(["--cache"])
+        cmd.append("--cache")
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
@@ -239,7 +239,7 @@ async def get_conan_profile(
 ) -> dict:
     cmd = [_get_conan_binary(), "profile", "show", "--format=json"]
     if profile:
-        cmd.extend([f"--profile={profile}"])
+        cmd.append(f"--profile={profile}")
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
@@ -370,31 +370,31 @@ async def install_conan_packages(
     cmd = [_get_conan_binary(), "install", actual_path]
 
     if remote and not search_in_cache:
-        cmd.extend([f"--remote={remote}"])
+        cmd.append(f"--remote={remote}")
 
     if search_in_cache:
-        cmd.extend(["--no-remote"])
+        cmd.append("--no-remote")
 
     if build_profile:
-        cmd.extend([f"-pr:b={build_profile}"])
+        cmd.append(f"-pr:b={build_profile}")
 
     if host_profile:
-        cmd.extend([f"-pr:h={host_profile}"])
+        cmd.append(f"-pr:h={host_profile}")
 
     if settings_host:
         for sh in settings_host:
-            cmd.extend([f"-s:h={sh}"])
+            cmd.append(f"-s:h={sh}")
     if options_host:
         for oh in options_host:
-            cmd.extend([f"-o:h={oh}"])
+            cmd.append(f"-o:h={oh}")
 
     timeout = 90.0
 
     if build_missing:
-        cmd.extend(["--build=missing"])
+        cmd.append("--build=missing")
         timeout = 300.0
 
-    cmd.extend(["--format=json"])
+    cmd.append("--format=json")
 
     # Convert Path to string only when passing to run_command
     raw_output = await run_command(cmd, timeout=timeout, cwd=str(base_work_dir))
@@ -482,20 +482,20 @@ async def create_conan_project(
     cmd = [_get_conan_binary(), "new", template]
 
     # Add template arguments
-    cmd.extend([f'--define="name={name}"'])
-    cmd.extend([f'--define="version={version}"'])
+    cmd.append(f'--define="name={name}"')
+    cmd.append(f'--define="version={version}"')
 
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend([f'--define="requires={dep.strip()}"'])
+                cmd.append(f'--define="requires={dep.strip()}"')
 
     # Add tool dependencies if provided
     if tool_requires:
         for dep in tool_requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend([f'--define="tool_requires={dep.strip()}"'])
+                cmd.append(f'--define="tool_requires={dep.strip()}"')
 
     # Add force flag if requested
     if force:
