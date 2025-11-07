@@ -191,13 +191,13 @@ async def list_conan_packages(
 
     cmd = [_get_conan_binary(), "list", pattern, "--format=json"]
     if remote:
-        cmd.extend(["--remote", remote])
+        cmd.extend([f"--remote={remote}"])
     if filter_settings:
         for fs in filter_settings:
-            cmd.extend(["-fs", fs])
+            cmd.extend([f"-fs={fs}"])
     if filter_options:
         for fo in filter_options:
-            cmd.extend(["-fo", fo])
+            cmd.extend([f"-fo={fo}"])
     if search_in_cache:
         cmd.extend(["--cache"])
     raw_output = await run_command(cmd)
@@ -239,7 +239,7 @@ async def get_conan_profile(
 ) -> dict:
     cmd = [_get_conan_binary(), "profile", "show", "--format=json"]
     if profile:
-        cmd.extend(["--profile", profile])
+        cmd.extend([f"--profile={profile}"])
     raw_output = await run_command(cmd)
     return json.loads(raw_output)
 
@@ -370,23 +370,23 @@ async def install_conan_packages(
     cmd = [_get_conan_binary(), "install", actual_path]
 
     if remote and not search_in_cache:
-        cmd.extend(["--remote", remote])
+        cmd.extend([f"--remote={remote}"])
 
     if search_in_cache:
         cmd.extend(["--no-remote"])
 
     if build_profile:
-        cmd.extend(["-pr:b", build_profile])
+        cmd.extend([f"-pr:b={build_profile}"])
 
     if host_profile:
-        cmd.extend(["-pr:h", host_profile])
+        cmd.extend([f"-pr:h={host_profile}"])
 
     if settings_host:
         for sh in settings_host:
-            cmd.extend(["-s:h", sh])
+            cmd.extend([f"-s:h={sh}"])
     if options_host:
         for oh in options_host:
-            cmd.extend(["-o:h", oh])
+            cmd.extend([f"-o:h={oh}"])
 
     timeout = 90.0
 
@@ -482,20 +482,20 @@ async def create_conan_project(
     cmd = [_get_conan_binary(), "new", template]
 
     # Add template arguments
-    cmd.extend(["--define", f"name={name}"])
-    cmd.extend(["--define", f"version={version}"])
+    cmd.extend([f'--define="name={name}"'])
+    cmd.extend([f'--define="version={version}"'])
 
     # Add dependencies if provided
     if requires:
         for dep in requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend(["--define", f"requires={dep.strip()}"])
+                cmd.extend([f'--define="requires={dep.strip()}"'])
 
     # Add tool dependencies if provided
     if tool_requires:
         for dep in tool_requires:
             if dep.strip():  # Skip empty strings
-                cmd.extend(["--define", f"tool_requires={dep.strip()}"])
+                cmd.extend([f'--define="tool_requires={dep.strip()}"'])
 
     # Add force flag if requested
     if force:
