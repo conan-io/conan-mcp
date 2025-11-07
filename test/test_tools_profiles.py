@@ -88,8 +88,7 @@ async def test_get_conan_profile_specific(
     assert "profile" in call_args
     assert "show" in call_args
     assert "--format=json" in call_args
-    assert "--profile" in call_args
-    assert "linux-debug" in call_args
+    assert "--profile=linux-debug" in call_args
 
 
 @pytest.mark.anyio
