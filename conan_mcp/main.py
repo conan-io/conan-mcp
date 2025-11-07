@@ -627,7 +627,9 @@ async def check_conan_packages_licenses(
 
     # Expand ~ in work_dir and ensure it exists
     base_work_dir = Path(work_dir).expanduser()
-    assert base_work_dir.is_dir(), f"Work directory {base_work_dir} does not exist"
+    if not base_work_dir.is_dir():
+        raise FileNotFoundError(f"Work directory does not exist: {base_work_dir}")
+
 
     # Build conan graph info command
     cmd = [_get_conan_binary(), "graph", "info", "--format=json"]
