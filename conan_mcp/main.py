@@ -513,6 +513,155 @@ async def create_conan_project(
     }
 
 
+def _extract_licenses_from_graph(graph_data: dict) -> list[dict[str, str | list[str]]]:
+    """Extract license information from conan graph info JSON output.
+
+    Args:
+        graph_data: Parsed JSON from conan graph info
+
+    Returns:
+        List of dictionaries, each containing "ref" (package reference) and "licenses" (list of license strings)
+    """
+    licenses_list = []
+
+    nodes = graph_data.get("graph", {}).get("nodes", {})
+
+    for node_id, node_data in nodes.items():
+        # Only process nodes in the "host" context (skip build context nodes)
+        context = node_data.get("context")
+        if context != "host":
+            continue
+
+        recipe = node_data.get("recipe")
+        # Skip the root conanfile node (not a dependency)
+        if recipe == "Consumer":
+            continue
+
+        # Try multiple ways to get license information
+        license_info = node_data.get("license")
+
+        # Handle license as string, list, or None - always convert to list
+        if isinstance(license_info, list):
+            # Filter out None/empty values and convert to strings
+            licenses = [str(l) for l in license_info if l]
+        elif license_info:
+            # Single license as string
+            licenses = [str(license_info)]
+        else:
+            # No license specified
+            licenses = []
+
+        ref = node_data.get("ref")
+        licenses_list.append({"ref": ref, "licenses": licenses})
+
+    return licenses_list
+
+
+@mcp.tool(
+    description="""
+    Collect license information for Conan package dependencies.
+
+    This tool uses `conan graph info` to extract license information from the dependency
+    graph for all packages.
+
+    Only packages in the "host" context are analyzed (build context packages are excluded
+    as they are build-time tools and not included in the final product).
+
+    You can either provide a path to a conanfile OR a list of package references to check.
+    At least one of these must be provided.
+
+    Examples:
+        - get_conan_licenses(work_dir="/home/user/project", path="conanfile.py")
+        - get_conan_licenses(work_dir="~/my_project", path="conanfile.txt")
+        - get_conan_licenses(work_dir="/tmp", requires=["zlib/1.2.11"])
+        - get_conan_licenses(work_dir="/tmp", requires=["zlib/1.2.11", "fmt/10.0.0"])
+
+    Args:
+        work_dir: Working directory where the command should be executed.
+                  This is the base directory from which all paths are resolved.
+                  Always required.
+        path: Path to a folder containing a recipe or to a recipe file (conanfile.txt or conanfile.py).
+              This path is ALWAYS relative to work_dir. Optional if requires is provided.
+        requires: List of package references to check licenses for (e.g., ["zlib/1.2.11", "fmt/10.0.0"]).
+                  Each reference will be passed as a --requires flag to conan graph info.
+                  Optional if path is provided. At least one of path or requires must be provided.
+        remote: Optional remote name to search in (searches all remotes if not specified)
+        build_profile: Profile to the build context.
+        host_profile: Profile to the host context.
+
+    Returns:
+        List of dictionaries, each containing:
+        - "ref": Package reference (string)
+        - "licenses": List of license strings (always a list, empty if no license specified)
+    """
+)
+async def get_conan_licenses(
+    work_dir: str = Field(
+        description="Working directory where the command should be executed. This is the base directory from which all paths are resolved. Always required."
+    ),
+    path: str = Field(
+        default=None,
+        description="Path to the folder containing the recipe of the project or to a recipe file conanfile.txt/.py. Optional if requires is provided."
+    ),
+    requires: list[str] = Field(
+        default=None,
+        description="List of package references to check licenses for (e.g., ['zlib/1.2.11', 'fmt/10.0.0']). Each reference will be passed as a --requires flag. Optional if path is provided."
+    ),
+    remote: str = Field(
+        default=None, description="Remote name. Omit to search in all remotes."
+    ),
+    build_profile: str = Field(
+        default=None,
+        description="Profile to the build context.",
+    ),
+    host_profile: str = Field(
+        default=None,
+        description="Profile to the host context.",
+    ),
+) -> list[dict[str, str | list[str]]]:
+    """Collect license information for Conan package dependencies."""
+
+    # Validate that at least one of path or requires is provided
+    if not path and not requires:
+        raise ValueError("Either 'path' or 'requires' must be provided")
+
+    # Expand ~ in work_dir and ensure it exists
+    base_work_dir = Path(work_dir).expanduser()
+    if not base_work_dir.is_dir():
+        raise FileNotFoundError(f"Work directory does not exist: {base_work_dir}")
+
+
+    # Build conan graph info command
+    cmd = [_get_conan_binary(), "graph", "info", "--format=json"]
+
+    # Add path or requires
+    if path:
+        # Path is always relative to work_dir
+        actual_path = str(base_work_dir / path)
+        cmd.append(actual_path)
+    elif requires:
+        # Add each reference as a --requires flag
+        for ref in requires:
+            cmd.append(f"--requires={ref}")
+
+    if remote:
+        cmd.append(f"--remote={remote}")
+
+    if build_profile:
+        cmd.append(f"-pr:b={build_profile}")
+
+    if host_profile:
+        cmd.append(f"-pr:h={host_profile}")
+
+    # Execute command with longer timeout since graph info can take time
+    raw_output = await run_command(cmd, timeout=90.0, cwd=str(base_work_dir))
+    graph_data = json.loads(raw_output)
+
+    # Extract licenses from graph
+    licenses_list = _extract_licenses_from_graph(graph_data)
+
+    return licenses_list
+
 @mcp.tool(
     description="""
     ⚠️ WARNING: This tool makes an API call to audit.conan.io service. Only use when explicitly requested by the user.

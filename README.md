@@ -144,6 +144,24 @@ Usage examples:
 - *"Install dependencies from ~/project for architecture armv8, and shared=False build the missing binaries"*
 - *"Install dependencies in this project use windows profile for host and linux profile for build"*
 
+**`get_conan_licenses`**
+
+Collect license information for Conan package dependencies. This tool uses `conan graph info` to extract license information from the dependency graph for all packages.
+
+Only packages in the "host" context are analyzed (build context packages are excluded as they are build-time tools and not included in the final product).
+
+Parameters:
+- `work_dir` (**required**): Working directory where the command should be executed. This is the base directory from which all paths are resolved.
+- `path` (**required**): Path to the folder containing the recipe, or to a `conanfile.txt` or `conanfile.py`. This path is ALWAYS relative to `work_dir`.
+- `remote` (optional): Name of the remote to search for dependencies. If omitted, all remotes are searched.
+- `build_profile` (optional): Profile to the build context.
+- `host_profile` (optional): Profile to the host context.
+
+Usage examples:
+- *"Collect license information for dependencies in this project"*
+- *"Get all licenses from my project dependencies"*
+- *"Collect license information for conanfile.py in ~/my_project using the windows profile"*
+
 **`scan_conan_dependencies`**
 
 Scan Conan packages and dependencies for security vulnerabilities
