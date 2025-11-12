@@ -34,8 +34,6 @@ uv pip install conan-mcp
 
 Add to your `mcp.json`:
 
-Using `uvx` (recommended):
-
 ```json
 {
   "mcpServers": {
@@ -47,20 +45,7 @@ Using `uvx` (recommended):
 }
 ```
 
-Or using `uv run`:
-
-```json
-{
-  "mcpServers": {
-    "conan": {
-      "command": "uv",
-      "args": ["run", "conan-mcp"]
-    }
-  }
-}
-```
-
-> **Note:** Both `uvx` and `uv run` are provided by [uv](https://github.com/astral-sh/uv). If you don't have `uv` installed, you can install it or use `pip install conan-mcp` and then use `conan-mcp` directly as the command.
+> **Note:** `uvx` is provided by [uv](https://github.com/astral-sh/uv). If you don't have `uv` installed, you can install it or use `pip install conan-mcp` and then use `conan-mcp` directly as the command.
 
 #### Configuring Conan Binary Path
 
