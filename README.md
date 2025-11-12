@@ -15,11 +15,26 @@ A Model Context Protocol server for Conan package manager integration.
 
 - Python >= 3.10
 - Conan [installed](https://docs.conan.io/2/installation.html)
-- [uv](https://github.com/astral-sh/uv) (optional, recommended)
+
+### Install from PyPI
+
+Install the package from PyPI:
+
+```bash
+pip install conan-mcp
+```
+
+Or using `uv`:
+
+```bash
+uv pip install conan-mcp
+```
 
 ### MCP Configuration
 
 Add to your `mcp.json`:
+
+Using `uvx` (recommended):
 
 ```json
 {
@@ -31,6 +46,21 @@ Add to your `mcp.json`:
   }
 }
 ```
+
+Or using `uv run`:
+
+```json
+{
+  "mcpServers": {
+    "conan": {
+      "command": "uv",
+      "args": ["run", "conan-mcp"]
+    }
+  }
+}
+```
+
+> **Note:** Both `uvx` and `uv run` are provided by [uv](https://github.com/astral-sh/uv). If you don't have `uv` installed, you can install it or use `pip install conan-mcp` and then use `conan-mcp` directly as the command.
 
 #### Configuring Conan Binary Path
 
