@@ -3,7 +3,7 @@ name = "conan-mcp"
 version = "0.1.0"
 description = "MCP server for Conan package manager"
 readme = "README.md"
-license = {text = "MIT"}
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
     "conan>=2.22.1",
@@ -27,5 +27,5 @@ conan-mcp = "conan_mcp.main:main"
 where = ["."]
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
