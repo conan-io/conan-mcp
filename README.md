@@ -16,20 +16,6 @@ A Model Context Protocol server for Conan package manager integration.
 - Python >= 3.10
 - Conan [installed](https://docs.conan.io/2/installation.html)
 
-### Install from PyPI
-
-Install the package from PyPI:
-
-```bash
-pip install conan-mcp
-```
-
-Or using `uv`:
-
-```bash
-uv pip install conan-mcp
-```
-
 ### MCP Configuration
 
 Add to your `mcp.json`:
