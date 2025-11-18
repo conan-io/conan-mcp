@@ -569,6 +569,11 @@ def _extract_licenses_from_graph(graph_data: dict) -> list[dict[str, str | list[
 
     You can either provide a path to a conanfile OR a list of package references to check.
     At least one of these must be provided.
+    
+    Use this tool when you need to:
+    - Search for licenses of the project
+    - Extract license information
+    - Check license information 
 
     Examples:
         - get_conan_licenses(work_dir="/home/user/project", path="conanfile.py")
