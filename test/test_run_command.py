@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
 
-import main
+from conan_mcp.main import run_command
 
 
 @pytest.fixture
@@ -21,14 +21,15 @@ class TestRunCommand:
         mock_proc.communicate.return_value = (b"Hello World\n", b"")
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc) as mock_create:
-            result = await main.run_command(["echo", "Hello World"])
+            result = await run_command(["echo", "Hello World"])
             
             assert result == "Hello World\n"
             mock_create.assert_called_once_with(
                 "echo", "Hello World",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                stdin=asyncio.subprocess.DEVNULL
+                stdin=asyncio.subprocess.DEVNULL,
+                cwd=None
             )
 
     @pytest.mark.anyio
@@ -40,7 +41,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command error: Command failed: file not found"):
-                await main.run_command(["invalid_command"])
+                await run_command(["invalid_command"])
 
     @pytest.mark.anyio
     async def test_command_with_empty_stderr(self):
@@ -51,7 +52,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command error: Conan command failed with return code 2"):
-                await main.run_command(["failing_command"])
+                await run_command(["failing_command"])
 
     @pytest.mark.anyio
     async def test_command_timeout(self):
@@ -61,7 +62,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command timeout after 30.0s"):
-                await main.run_command(["slow_command"])
+                await run_command(["slow_command"])
 
     @pytest.mark.anyio
     async def test_command_timeout_with_custom_timeout(self):
@@ -71,7 +72,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command timeout after 5.0s"):
-                await main.run_command(["slow_command"], timeout=5.0)
+                await run_command(["slow_command"], timeout=5.0)
 
     @pytest.mark.anyio
     async def test_command_cancellation(self):
@@ -81,21 +82,21 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(asyncio.CancelledError):
-                await main.run_command(["cancelled_command"])
+                await run_command(["cancelled_command"])
 
     @pytest.mark.anyio
     async def test_command_not_found(self):
         """Test command not found error."""
         with patch('asyncio.create_subprocess_exec', side_effect=FileNotFoundError()):
             with pytest.raises(RuntimeError, match="Command not found."):
-                await main.run_command(["nonexistent_command"])
+                await run_command(["nonexistent_command"])
 
     @pytest.mark.anyio
     async def test_generic_exception_handling(self):
         """Test handling of generic exceptions."""
         with patch('asyncio.create_subprocess_exec', side_effect=Exception("Unexpected error")):
             with pytest.raises(RuntimeError, match="Error running command: Unexpected error"):
-                await main.run_command(["problematic_command"])
+                await run_command(["problematic_command"])
 
     @pytest.mark.anyio
     async def test_unicode_output_handling(self):
@@ -106,7 +107,7 @@ class TestRunCommand:
         mock_proc.communicate.return_value = (b"Hello \xff World\n", b"")
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
-            result = await main.run_command(["echo", "unicode_test"])
+            result = await run_command(["echo", "unicode_test"])
             # Should handle invalid UTF-8 gracefully with replacement
             assert "Hello" in result
             assert "World" in result
@@ -120,7 +121,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command error: Error: .*file.* not found"):
-                await main.run_command(["unicode_error_command"])
+                await run_command(["unicode_error_command"])
 
     @pytest.mark.anyio
     async def test_process_kill_on_timeout(self):
@@ -130,7 +131,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command timeout after 30.0s"):
-                await main.run_command(["slow_command"])
+                await run_command(["slow_command"])
             
             # Verify process was killed
             mock_proc.kill.assert_called_once()
@@ -143,7 +144,7 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(asyncio.CancelledError):
-                await main.run_command(["cancelled_command"])
+                await run_command(["cancelled_command"])
             
             # Verify process was killed
             mock_proc.kill.assert_called_once()
@@ -157,7 +158,7 @@ class TestRunCommand:
         mock_proc.communicate.return_value = (output, b"")
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
-            result = await main.run_command(["multiline_command"])
+            result = await run_command(["multiline_command"])
             assert result == "Line 1\nLine 2\nLine 3\n"
 
     @pytest.mark.anyio
@@ -168,7 +169,7 @@ class TestRunCommand:
         mock_proc.communicate.return_value = (b"", b"")
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
-            result = await main.run_command(["empty_output_command"])
+            result = await run_command(["empty_output_command"])
             assert result == ""
 
     @pytest.mark.anyio
@@ -179,14 +180,15 @@ class TestRunCommand:
         mock_proc.communicate.return_value = (b"arg1 arg2 arg3\n", b"")
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc) as mock_create:
-            result = await main.run_command(["test_command", "arg1", "arg2", "arg3"])
+            result = await run_command(["test_command", "arg1", "arg2", "arg3"])
             
             assert result == "arg1 arg2 arg3\n"
             mock_create.assert_called_once_with(
                 "test_command", "arg1", "arg2", "arg3",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                stdin=asyncio.subprocess.DEVNULL
+                stdin=asyncio.subprocess.DEVNULL,
+                cwd=None
             )
 
     @pytest.mark.anyio
@@ -202,4 +204,4 @@ class TestRunCommand:
         
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command timeout after 0.05s"):
-                await main.run_command(["slow_command"], timeout=0.05)
+                await run_command(["slow_command"], timeout=0.05)
