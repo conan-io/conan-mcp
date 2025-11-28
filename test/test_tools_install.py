@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 
 import pytest
@@ -37,7 +38,7 @@ async def test_install_conan_packages_basic(
     # Verify the command was composed correctly
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "install", "/path/to/conanfile.txt", "--format=json"]
+    expected_cmd = ["conan", "install", os.path.normpath("/path/to/conanfile.txt"), "--format=json"]
     assert call_args == expected_cmd
 
     # Verify timeout is default (90.0)
@@ -69,7 +70,7 @@ async def test_install_conan_packages_with_remote(
     expected_cmd = [
         "conan",
         "install",
-        "/path/to/project/conanfile.py",
+        os.path.normpath("/path/to/project/conanfile.py"),
         "--remote=conancenter",
         "--format=json",
     ]
@@ -107,7 +108,7 @@ async def test_install_conan_packages_with_settings_and_options(
     expected_cmd = [
         "conan",
         "install",
-        "/home/user/project/conanfile.py",
+        os.path.normpath("/home/user/project/conanfile.py"),
         "-s:h=os=Linux",
         "-s:h=arch=armv8",
         "-s:h=compiler=gcc",
@@ -149,7 +150,7 @@ async def test_install_conan_packages_with_profile(
     expected_cmd = [
         "conan",
         "install",
-        "/path/to/project/conanfile.py",
+        os.path.normpath("/path/to/project/conanfile.py"),
         "-pr:b=linux-debug",
         "-pr:h=Windows-msvc193-x86_64-Release",
         "--format=json",
