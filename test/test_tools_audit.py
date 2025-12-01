@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 
 import pytest
@@ -36,7 +37,7 @@ async def test_scan_conan_dependencies_with_path(
     # Verify the command was composed correctly
     mock_run_command.assert_called_once()
     call_args = mock_run_command.call_args[0][0]
-    expected_cmd = ["conan", "audit", "scan", "/path/to/conanfile.txt", "--format=json"]
+    expected_cmd = ["conan", "audit", "scan", os.path.normpath("/path/to/conanfile.txt"), "--format=json"]
     assert call_args == expected_cmd
 
 
