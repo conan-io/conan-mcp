@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
 from conan_mcp.main import run_command
 
