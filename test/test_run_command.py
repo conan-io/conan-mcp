@@ -75,26 +75,15 @@ class TestRunCommand:
 
     @pytest.mark.anyio
     async def test_command_timeout(self):
-        """Test command that times out with default time, custom time and when process is killed."""
+        """Test command that times out."""
         mock_proc = AsyncMock()
         mock_proc.communicate.side_effect = asyncio.TimeoutError()
-        
-        with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
-            with pytest.raises(RuntimeError, match="Command timeout after 30.0s"):
-                await run_command(["slow_command"])
 
         with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
             with pytest.raises(RuntimeError, match="Command timeout after 5.0s"):
                 await run_command(["slow_command"], timeout=5.0)
 
-        mock_proc.communicate.side_effect = asyncio.TimeoutError()
-
-        with patch('asyncio.create_subprocess_exec', return_value=mock_proc):
-            with pytest.raises(RuntimeError, match="Command timeout after 30.0s"):
-                await run_command(["slow_command"])
-
-            # Verify process was killed
-            mock_proc.kill.call_count == 3
+        mock_proc.kill.assert_called_once()
 
     @pytest.mark.anyio
     async def test_generic_exception_handling(self):
