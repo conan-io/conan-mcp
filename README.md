@@ -9,6 +9,10 @@ A Model Context Protocol server for Conan package manager integration.
 > libraries I depend on don't have serious vulnerabilities and have a license
 > that allows my application to be commercial."*
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/conan-io-conan-mcp).
+
 ## Installation
 
 ### Requirements
